@@ -1,5 +1,5 @@
-# local-orchestrator
 
+A Beginners journey into making a real ai orchestration.
 Minimal agent loop with a swappable model backend: run it against a
 local model (Ollama) on your own hardware, or point it at Claude's
 API with one flag change. No other code changes needed either way.
@@ -88,3 +88,4 @@ The orchestrator picks it up automatically -- no changes needed there.
 - `MAX_STEPS = 6` in `orchestrator.py` is a safety cap so a confused
   small model can't loop forever calling tools. Raise it once you
   trust the loop.
+
