@@ -1,0 +1,7 @@
+//will need to learn more about how this file works
+{
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  }
+}

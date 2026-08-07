@@ -1,0 +1,352 @@
+prompt{
+    I am using VS code, and i have an extension called Pylance that is powered by PyRight. 
+    I have also downloaded Ruff. In the details of the ruff extension on VS code,
+    under 'configuring VS Code' i can configure Ruff to format Python code on-save by enabling
+    the editor.formatOnSave action in settings.json, and setting Ruff as the default formatter.
+    I created a settings.json file in my project folder, and pasted the following code snippet:
+        {
+            "[python]": {
+                "editor.formatOnSave": true,
+                "editor.defaultFormatter": "charliermarsh.ruff"
+            }
+        }
+        End of code snippet.
+    How does this interact with Pylance though?  
+    I want an explanation of type checkers, linters, and formatters, 
+    and how this settings.json file with the code snippet 
+    i've added above applies to the concept so that I understand how these all interact.
+}
+
+Explanation by Copilot
+This is a great question because Pylance/Pyright and Ruff operate at different layers, and understanding those layers makes VS Code Python tooling much less confusing.
+
+The Three Main Tools
+
+Think of Python tooling as answering three different questions:
+
+Tool Type	    Question It Answers	                                        Example
+Formatter	    "How should this code be written?"	                        Indentation, line breaks, quote style
+Linter	        "Does this code look suspicious or violate style rules?"	Unused imports, unreachable code
+Type Checker	"Do the types make sense?"	                                Passing a string where an int is expected
+
+1. Formatter
+
+A formatter changes the appearance of your code without changing what it does.
+
+Example
+
+Before formatting:
+
+def add( a,b ):
+ return a+b
+
+
+After formatting:
+
+def add(a, b):
+    return a + b
+
+
+Nothing about the program's behavior changed. The formatter simply rewrote the code into a consistent style.
+
+Ruff as a Formatter
+
+Your settings:
+
+{
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  }
+}
+
+
+tell VS Code:
+
+Whenever I save a Python file, run the Ruff formatter.
+
+So if you save:
+
+x=  1
+y=2
+print( x+y )
+
+
+Ruff may rewrite it as:
+
+x = 1
+y = 2
+print(x + y)
+
+2. Linter
+
+A linter analyzes code and warns about things that are potentially incorrect, unnecessary, or against style conventions.
+
+Example
+import math
+
+x = 5
+
+
+A linter may report:
+
+Imported module 'math' is unused.
+
+because you never used math.
+
+Another example:
+
+if True:
+    return 5
+    print("hello")
+
+
+The linter might warn:
+
+Unreachable code.
+
+Ruff as a Linter
+
+Ruff started primarily as a linter.
+
+When configured as a linter, Ruff scans your code and reports things such as:
+
+import math
+
+def greet():
+    pass
+
+
+Possible Ruff messages:
+
+unused import math
+unnecessary pass
+style issues
+
+Some of these can even be auto-fixed by Ruff.
+
+3. Type Checker
+
+A type checker reasons about the kinds of values flowing through your program.
+
+Example
+def double(x: int) -> int:
+    return x * 2
+
+double("hello")
+
+
+Python itself will allow you to write this code.
+
+But a type checker notices:
+
+Argument of type "str" cannot be assigned to parameter of type "int"
+
+
+because:
+
+function expects int
+you passed str
+Pyright / Pylance
+
+This is where Pylance comes in.
+
+Pylance is the VS Code Python language server.
+
+One of the technologies it uses internally is Pyright, Microsoft's static type checker.
+
+Pylance provides:
+
+IntelliSense/autocomplete
+Go to definition
+Find references
+type analysis
+error squiggles
+hover information
+
+For example:
+
+def add(a: int, b: int) -> int:
+    return a + b
+
+result = add("1", 2)
+
+
+Pylance/Pyright will likely underline "1" and say something like:
+
+Argument of type "Literal['1']" cannot be assigned to parameter of type "int"
+
+How Ruff and Pylance Interact
+
+The key point:
+
+They generally do different jobs.
+
+Ruff
+
+Focuses on:
+
+formatting
+linting
+some code quality checks
+some import organization
+Pylance/Pyright
+
+Focuses on:
+
+type checking
+language intelligence
+completion
+navigation
+
+So for:
+
+def greet(name: str) -> str:
+    return name
+
+greet(5)
+
+
+Pylance/Pyright complains about:
+
+Expected str, got int
+
+
+Ruff may not care.
+
+What Happens When You Save?
+
+With your settings:
+
+{
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  }
+}
+
+
+the sequence is roughly:
+
+You edit Python file.
+Pylance continuously analyzes code while you type.
+You press Save.
+VS Code invokes Ruff formatter.
+Ruff rewrites the file's formatting.
+Pylance immediately re-analyzes the updated file.
+
+So:
+
+x=1
+
+
+becomes:
+
+x = 1
+
+
+and then Pylance re-checks the file.
+
+Pylance didn't do the formatting. Ruff did.
+
+A Real Example
+
+Suppose you write:
+
+import math
+
+def repeat(msg: str) -> str:
+    return msg * 2
+
+repeat(123)
+
+Ruff (Linting)
+
+Might say:
+
+'math' imported but unused
+
+Pylance/Pyright (Type Checking)
+
+Might say:
+
+Argument of type "Literal[123]" cannot be assigned to parameter of type "str"
+
+Ruff Formatter
+
+Might rewrite spacing to:
+
+import math
+
+
+def repeat(msg: str) -> str:
+    return msg * 2
+
+
+repeat(123)
+
+
+Notice:
+
+Ruff Formatter changes code style.
+Ruff Linter finds style/quality problems.
+Pylance finds type problems.
+Why Many People Use Ruff + Pylance Together
+
+This combination is becoming very popular because:
+
+Ruff
+
+extremely fast
+formatter
+linter
+import sorter
+
+Pylance
+
+excellent IntelliSense
+powerful type checking
+deep VS Code integration
+
+Many Python developers effectively use:
+
+Ruff     -> formatting + linting
+Pylance  -> type checking + IDE features
+
+One Subtle Point
+
+Your settings.json only configures Ruff as a formatter.
+
+It does not automatically disable Pylance.
+
+It also does not necessarily configure Ruff linting.
+
+Right now, your settings simply say:
+
+When saving Python files,
+use Ruff to format them.
+
+
+Pylance is still running normally in the background providing:
+
+autocomplete
+type checking
+hover information
+navigation
+
+Unless you've explicitly changed other settings, the two extensions coexist and complement each other rather than compete with one another.
+
+A helpful mental model is:
+
+                Python file
+                      |
+          -------------------------
+          |           |           |
+      Formatter    Linter    Type Checker
+          |           |           |
+         Ruff       Ruff      Pyright
+                               ^
+                            Pylance
+
+
+That diagram is essentially how your current VS Code setup is functioning.
