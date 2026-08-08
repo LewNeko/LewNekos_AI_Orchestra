@@ -57,18 +57,8 @@ What happens:
 
 Everything above runs entirely on your machine. No API calls, no data leaving your laptop.
 
-## 5. Swap to Claude when you need stronger reasoning
 
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...   # get one at console.anthropic.com
-python orchestrator.py claude "Same task, but harder -- multi-step reasoning here."
-```
-
-Same `orchestrator.py`, same `tools.py`, same task format. Only the
-`backend_name` argument changed. This is the whole point of the
-architecture: your agent logic never knows or cares which model answered.
-
-## 6. Add your own tools
+## 5. Add your own tools
 
 In `tools.py`:
 1. Add a schema entry to `TOOL_SCHEMA` (name, description, parameters).
@@ -89,3 +79,16 @@ The orchestrator picks it up automatically -- no changes needed there.
   small model can't loop forever calling tools. Raise it once you
   trust the loop.
 
+## 6. [Danger Zone] Swap to Claude when you need stronger reasoning
+- If you are reading this with intent to use, you should know a few things for first.
+1. This is not free. Anthropic tokens cost money, and if you want to have strong units function through the reasoning, it's going to cost quite a bit.
+2. You are giving an AI from an outside source some rule of your computer, restricted to the directly or direction you point it in.
+3. You should have a really good understanding of AI, Local AI, directories, and how prompt in this context works, this is not the same as chatting with a web-chat version of AI, its running on your machine, you have full control... until you do this, then part of that control isn't yours anymore. 
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...   # get one at console.anthropic.com
+python orchestrator.py claude "Same task, but harder -- multi-step reasoning here."
+```
+
+Same `orchestrator.py`, same `tools.py`, same task format. Only the
+`backend_name` argument changed. This is the whole point of the
+architecture: your agent logic never knows or cares which model answered.
