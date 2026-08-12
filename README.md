@@ -5,7 +5,7 @@ local model (Ollama) on your own hardware, or point it at Claude's
 API with one flag change. No other code changes needed either way.
 
 Built for: 16GB RAM, RTX 3050 Laptop (4GB VRAM).
-
+Can also
 ```
 tools.py         <- what the agent is allowed to DO (list_directory, read_file)
 backends.py       <- HOW to talk to a model (Ollama or Claude), one interface

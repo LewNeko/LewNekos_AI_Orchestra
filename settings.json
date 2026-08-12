@@ -1,4 +1,4 @@
-//will need to learn more about how this file works
+//will need to learn more about how this file works. This snippet is straight from Ruff extension documentation.
 {
   "[python]": {
     "editor.formatOnSave": true,

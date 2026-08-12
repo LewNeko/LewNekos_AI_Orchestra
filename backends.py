@@ -113,7 +113,20 @@ def _openai_tools_to_anthropic(tools: list) -> list:
 
 # ---- Backend registry: this is the "swap" switch ----
 BACKENDS = {
-    "ollama": lambda: OllamaBackend(model="qwen3:4b"),
+    """
+qwen3:4b is at home, no need to use it if device can use a stronger version.
+qwen3-coder is massive, please do not use it casually.
+
+qwen3-coder:latest       06c1097efce0    18 GB     STRONGEST
+qwen3:8b                 500a1f067a9f    5.2 GB    Good
+embeddinggemma:latest    85462619ee72    621 MB    functionality
+gemma3:4b                a2af6cc3eb7f    3.3 GB    Everyday Use
+"""
+    "ollama-qwen3:4b": lambda: OllamaBackend(model="qwen3:4b"),
+    "ollama-qwen3:8b": lambda: OllamaBackend(model="qwen3:8b"),
+    "ollama-qwen3-coder": lambda: OllamaBackend(model="qwen3-coder:latest"),
+    "ollama-embed4gemma": lambda: OllamaBackend(model="embeddinggemma:latest"),
+    "ollama-gemma3:4b": lambda: OllamaBackend(model="gemma3:4b"),
     "claude": lambda: ClaudeBackend(model="claude-sonnet-5"),
 }
 

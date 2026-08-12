@@ -39,6 +39,60 @@ REVISED: YES or NO
 REVISION_QUOTE: <exact sentence that revises it, or NOT FOUND>
 CORRECTED_ANSWER: <the new value if revised, or SAME>
 """
+#Extraction prompt for the reviser model to avoid doing math (AI is bad at math)
+REVISION_EXTRACT_PROMPT = """You are checking whether a previously 
+extracted answer is still accurate given the FULL source chunk below.
+
+CHUNK:
+{chunk}
+
+An earlier step extracted this answer:
+ITEM: {item}
+ANSWER: {answer}
+QUOTE: {quote}
+Status: {status}
+Does any OTHER sentence in the chunk revise this specific numeric fact? 
+Do not calculate the corrected value yourself. 
+Only extract the raw numbers. respond in exactly this format:
+
+REVISED: YES or NO
+REVISION_QUOTE: <exact sentence that revises it, or NOT FOUND>
+ORIGINAL_VALUE: <the original number in the QUOTE, digits only>
+DELTA_DIRECTION: INCREASE, DECREASE, DIVIDED, MULTIPLIED, or NONE
+DELTA_VALUE: <the change amount, digits only>
+"""
+def compute_corrected_value(revision_result_text):
+    """Pure Python math so the model isn't involved.
+    AI is bad at math, so give it a calculator"""
+    fields = {}
+    for line in revision_result_text.strip().splitlines():
+        if ":" in line:
+            k, v = line.split(":", 1)
+            fields[k.strip()] = v.strip()
+
+    if fields.get("REVISED") != "YES":
+        return None #its not revised so theres nothing to compute
+    direction = fields.get("DELTA_DIRECTION", "NONE")
+
+    if direction == "NONE":
+        return None 
+    
+    try:
+        original = float(fields["ORIGINAL_VALUE"].replace("$", "").replace(",", ""))
+        delta = float(fields["DELTA_VALUE"].replace("$", "").replace(",", ""))
+    except (KeyError, ValueError):
+        return "PARSE_ERROR" #if the parser messed up
+
+    #covers the four basic arithmetic operations
+    if direction == "DECREASE":
+        return original - delta
+    elif direction == "INCREASE":
+        return original + delta
+    elif direction == "DIVIDED":
+        return original / delta
+    elif direction == "MULTIPLIED":
+        return original * delta
+    return None
 
 def parse_entries(raw_output):
     """Split raw model output into ITEM/ANSWER/QUOTE blocks."""
@@ -84,7 +138,7 @@ def mock_chat(prompt):
 #"Add and test a revision-check function against the stale amount entry""
 def check_for_revision(chunk, entry, chat_fn):
     """chat_fn is passed in so this stays testable without a live model call."""
-    prompt = REVISION_CHECK_PROMPT.format(
+    prompt = REVISION_EXTRACT_PROMPT.format(
         chunk=chunk, item=entry['item'], answer=entry['answer'], quote=entry['quote'], status=entry['status']
     )
     return chat_fn(prompt)

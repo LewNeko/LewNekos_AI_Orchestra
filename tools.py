@@ -45,7 +45,7 @@ def list_directory(path: str) -> str:
     try:
         entries = os.listdir(path)
         return "\n".join(entries) if entries else "(empty directory)"
-    except Exception as e:
+    except NotADirectoryError as e:
         return f"Error: {e}"
 
 
@@ -55,7 +55,7 @@ def read_file(path: str) -> str:
             content = f.read()
         # Keep tool output bounded so it doesn't blow up context.
         return content[:3000] + ("\n...(truncated)" if len(content) > 3000 else "")
-    except Exception as e:
+    except FileNotFoundError as e:
         return f"Error: {e}"
 
 
