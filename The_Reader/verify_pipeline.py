@@ -1,7 +1,13 @@
+""" used for testing the revision-check 
+function against a stale amount entry. """
 from py_compile import main
 import re
 
-CHUNK = "The invoice was issued on March 3rd, 2024, to Acme Corp. Payment terms are net-30. The total amount due is $4,250.00. No late fee schedule is mentioned in this section. They felt bad about that total amount due and made it a thousand dollars less."
+CHUNK = """The invoice was issued on March 3rd, 2024, to Acme
+"Corp. Payment terms are net-30. The total amount due is 
+"$4,250.00. No late fee schedule is mentioned in this section. 
+" They felt bad about that total amount due and made it a 
+"thousand dollars less."""
 
 # Simulating Gemma's actual raw output from your test
 RAW_OUTPUT = """ITEM: Does this chunk state a specific due date for payment?
@@ -116,6 +122,7 @@ def normalize(text):
     return re.sub(r'\s+', ' ', text.strip())
 
 def verify(entries, chunk):
+    """Check each entry against the source chunk and assign a status."""
     report = []
     for e in entries:
         status = "MISSING_FIELDS"
@@ -130,7 +137,7 @@ def verify(entries, chunk):
     return report
 
 def mock_chat(prompt):
-    # Simulates what gemma3:4b *should* say if it reasons over the whole chunk
+    """Simulates what gemma3:4b *should* say if it reasons over the whole chunk."""
     return "" + prompt 
 #+ "\nREVISED: YES \nREVISION_QUOTE: They felt bad about that total amount due and made it a thousand dollars less. \nCORRECTED_ANSWER: $3,250.00"
 
