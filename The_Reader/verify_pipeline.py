@@ -57,9 +57,11 @@ ITEM: {item}
 ANSWER: {answer}
 QUOTE: {quote}
 Status: {status}
-Does any OTHER sentence in the chunk revise this specific numeric fact? 
-Do not calculate the corrected value yourself. 
-Only extract the raw numbers. respond in exactly this format:
+Does any OTHER sentence in the chunk revise this SPECIFIC fact (not some other fact in the chunk)?
+Only answer YES if the revising sentence is clearly talking about the same thing as the ANSWER above.
+If the only candidate sentence you can find is about a different fact, answer NO.
+Do NOT calculate the corrected value yourself. Only extract the raw numbers.
+Respond in exactly this format:
 
 REVISED: YES or NO
 REVISION_QUOTE: <exact sentence that revises it, or NOT FOUND>
@@ -67,7 +69,14 @@ ORIGINAL_VALUE: <the original number in the QUOTE, digits only>
 DELTA_DIRECTION: INCREASE, DECREASE, DIVIDED, MULTIPLIED, or NONE
 DELTA_VALUE: <the change amount, digits only>
 """
-def compute_corrected_value(revision_result_text):
+
+def is_self_referential(entry, fields):
+    """Catches if the models sites the original quote as its own 'revision'.
+    prevents the reviser from not revising a little"""
+    revision_quote = fields.get("REVISION_QUOTE","")
+    return normalize(revision_quote) == normalize(entry.get("quote",""))
+
+def compute_corrected_value(revision_result_text, entry = None):
     """Pure Python math so the model isn't involved.
     AI is bad at math, so give it a calculator"""
     fields = {}
@@ -78,8 +87,11 @@ def compute_corrected_value(revision_result_text):
 
     if fields.get("REVISED") != "YES":
         return None #its not revised so theres nothing to compute
-    direction = fields.get("DELTA_DIRECTION", "NONE")
 
+    if entry and is_self_referential(entry, fields):
+        return None # catches false positive when the revision cites itself.
+    
+    direction = fields.get("DELTA_DIRECTION", "NONE")
     if direction == "NONE":
         return None 
     

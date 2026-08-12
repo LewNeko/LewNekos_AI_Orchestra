@@ -1,0 +1,239 @@
+prompt:
+i'm trying to get the verify pipeline right, but i end up with the following:
+[VERIFIED] 
+Does this chunk state a specific due date for payment?
+    answer: YES
+    quote:  The invoice was issued on March 3rd, 2024
+--revisions below--
+REVISED: YES
+REVISION_QUOTE: The invoice was issued on March 3rd, 2024
+ORIGINAL_VALUE: 3
+DELTA_DIRECTION: DECREASE
+DELTA_VALUE: 1000
+--computes:--
+None
+--end of loop--
+[VERIFIED] 
+Does this chunk mention a late fee or penalty amount?
+    answer: NO
+    quote:  No late fee schedule is mentioned in this section.
+--revisions below--
+REVISED: YES
+REVISION_QUOTE: They felt bad about that total amount due and made it a thousand dollars less.
+ORIGINAL_VALUE: 4250
+DELTA_DIRECTION: DECREASE
+DELTA_VALUE: 1000
+--computes:--
+3250.0
+--end of loop--
+[VERIFIED] 
+What's the amount due?
+    answer: $4,250.00
+    quote:  The total amount due is $4,250.00
+--revisions below--
+REVISED: YES
+REVISION_QUOTE: They felt bad about that total amount due and made it a thousand dollars less.
+ORIGINAL_VALUE: 4250
+DELTA_DIRECTION: DECREASE
+DELTA_VALUE: 1000
+--computes:--
+3250.0
+--end of loop--
+
+
+the first item is right on the first try, the reviser is citing itself so i made the computation send none, it needs work, but i've got a valid way to find the problem. I should say theres no need for a revision later on though, thats not the main point of this prompt either.
+
+
+the second item is also right on the first try, but the revisor is totally wrong, and is citing in a way i don't really know how to fix. it computes for a problem thats not there.
+
+
+the third item actually is wrong, and the revisor revises this properly, and the compute shows the right answer.
+
+
+i want to find a real way to tackle this second item because i don't know how to even fix that one compared to the others.
+
+
+AI reply
+
+i don't know how to even fix that one compared to the others.
+I think the second item exposes a deeper issue in the reviser prompt design.
+
+For the question:
+
+Does this chunk mention a late fee or penalty amount?
+
+the extracted answer is:
+
+NO
+ Quote: "No late fee schedule is mentioned in this section."
+
+Then the reviser sees:
+
+"They felt bad about that total amount due and made it a thousand dollars less."
+
+and concludes:
+
+REVISED: YES
+DELTA_DIRECTION: DECREASE
+DELTA_VALUE: 1000
+
+
+But that sentence is about the amount due, not the late fee.
+
+What's really happening?
+
+Your reviser is operating something like:
+
+Find numbers.
+Find change language ("less", "more", "reduced").
+Assume change == revision.
+
+It is not strongly grounding itself to the original fact being verified.
+
+The amount-due entry works because the revision sentence actually refers to:
+
+"that total amount due"
+
+which is the same fact.
+
+The late-fee entry fails because the reviser notices a revision somewhere in the chunk and
+ doesn't check whether the revision is talking about the same subject.
+
+The test I would add
+
+Before computing anything, ask:
+
+Does the revision quote refer to the same entity/subject as the original quote?
+
+For example:
+
+Original quote
+No late fee schedule is mentioned in this section.
+
+Candidate revision
+They felt bad about that total amount due and made it a thousand dollars less.
+
+
+Extract topics:
+
+original_topic  = "late fee"
+revision_topic  = "amount due"
+
+
+Not equal:
+
+return REVISED = NO
+
+I would actually change the prompt
+
+You already started moving in the right direction with this instruction:
+
+Does any OTHER sentence in the chunk revise this SPECIFIC fact
+(not some other fact in the chunk)?
+
+Only answer YES if the revising sentence is clearly talking
+about the same thing as the ANSWER above.
+
+
+I'd make it even more explicit:
+
+A sentence is only a revision if it refers to the same subject.
+
+Examples:
+
+Original fact: amount due = $4250
+Revision: total amount due was reduced by $1000
+=> YES
+
+Original fact: no late fee schedule mentioned
+Revision: total amount due was reduced by $1000
+=> NO
+
+Original fact: invoice date March 3rd
+Revision: total amount due was reduced by $1000
+=> NO
+
+
+LLMs respond extremely well to contrastive examples like this.
+
+Another thing: skip revision checks for some question types
+
+Look at these two:
+
+Does this chunk state a specific due date for payment?
+
+
+and
+
+Does this chunk mention a late fee or penalty amount?
+
+
+These are existence questions.
+
+They aren't really numeric facts that can be "decreased by $1000".
+
+You could classify questions before revision:
+
+if entry["answer"] in ("YES", "NO"):
+    skip_revision_check()
+
+
+or
+
+FACT_TYPES = {
+    "existence",
+    "numeric",
+    "date",
+    "name"
+}
+
+
+Only run arithmetic revision logic on:
+
+What's the amount due?
+
+
+not
+
+Does the chunk mention X?
+
+What I think is the strongest fix
+
+I'd use a two-stage reviser:
+
+Stage 1
+
+Find candidate revision sentence.
+
+Did any later sentence modify or update the fact?
+
+Stage 2
+
+Validate relevance.
+
+Is the candidate revision talking about the same subject?
+
+Original Quote:
+"No late fee schedule is mentioned..."
+
+Candidate Revision:
+"They felt bad about that total amount due..."
+
+Answer YES/NO
+
+
+Only if Stage 2 returns YES do you run:
+
+compute_corrected_value(...)
+
+
+That solves all three of your examples:
+
+Item	Candidate Revision Found?	Same Subject?	Revision Applied?Due date	No	No	No
+Late fee	Yes	No	No
+Amount due	Yes	Yes	Yes
+
+The interesting thing is that the second failure isn't really a math problem or even a revision problem. 
+It's a fact-linking problem. Your reviser needs to prove that a candidate revision refers to the same underlying 
+fact before it's allowed to compute anything. 
+The amount-due case already gives you the pattern to validate against.

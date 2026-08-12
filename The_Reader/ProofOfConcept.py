@@ -1,5 +1,14 @@
+"""so i can use the models"""
 from ollama import chat
-from verify_pipeline import check_for_revision, check_for_revision, compute_corrected_value, parse_entries, verify
+
+"""from verify pipeline"""
+from verify_pipeline import (
+    check_for_revision,
+    compute_corrected_value,
+    parse_entries,
+    verify,
+)
+
 CHUNK = """
 The invoice was issued on March 3rd, 2024, to Acme Corp. Payment terms are net-30. The total amount due is $4,250.00. No late fee schedule is mentioned in this section. 
 They felt bad about that total amount due and made it a thousand dollars less.
@@ -57,15 +66,15 @@ ENTRIES = parse_entries(run_checklist(CHUNK, CHECKLIST))
 REPORT = verify(ENTRIES, CHUNK)
 REVISIONS = []
 COMPUTATIONS = []
-for r in REPORT:
-    if r['status'] == "VERIFIED":
-        print(f"[{r['status']}] \n{r['item']}")
-        print(f"    answer: {r['answer']}")
-        print(f"    quote:  {r['quote']}")
+for entry in REPORT:
+    if entry['status'] == "VERIFIED":
+        print(f"[{entry['status']}] \n{entry['item']}")
+        print(f"    answer: {entry['answer']}")
+        print(f"    quote:  {entry['quote']}")
         print("--revisions below--")
-        revision = check_for_revision(CHUNK, r, chat_fn)
+        revision = check_for_revision(CHUNK, entry, chat_fn)
         REVISIONS.append(revision)
-        compute = compute_corrected_value(revision)
+        compute = compute_corrected_value(revision, entry) # r is an entry in
         COMPUTATIONS.append(compute)
         print(revision)
         print("--computes:--")
