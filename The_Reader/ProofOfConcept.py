@@ -6,6 +6,7 @@ from verify_pipeline import (
     check_for_revision,
     compute_corrected_value,
     parse_entries,
+    verified_categorizer,
     verify,
 )
 
@@ -61,25 +62,44 @@ def chat_fn (prompt):
     )
     return response.message.content
 
-#Check the response 
-ENTRIES = parse_entries(run_checklist(CHUNK, CHECKLIST))
-REPORT = verify(ENTRIES, CHUNK)
-REVISIONS = []
-COMPUTATIONS = []
-for entry in REPORT:
-    if entry['status'] == "VERIFIED":
-        print(f"[{entry['status']}] \n{entry['item']}")
-        print(f"    answer: {entry['answer']}")
-        print(f"    quote:  {entry['quote']}")
-        print("--revisions below--")
+#uses check_for_revision and compute_corrected_value
+def show_entry(report, REVISIONS, COMPUTATIONS):
+    """prints the"""
+    REVISIONS = []
+    COMPUTATIONS = []
+    for entry in report:
+        print(f"""
+        status: {entry['status']} 
+        question: {entry['item']}
+        answer: {entry['answer']}
+        quote:  {entry['quote']}
+        category: {entry['category']}""")
+        if entry['category'] == "DETERMINISTIC":
+            print("A different revision will be given for deterministic answers")
+            print("----------------")
+            continue
+        if entry['status'] == "UNVERIFIED_QUOTE":
+            print("Either or a warning or correction step will be taken for this")
+            print("----------------")
+            continue
         revision = check_for_revision(CHUNK, entry, chat_fn)
         REVISIONS.append(revision)
-        compute = compute_corrected_value(revision, entry) # r is an entry in
+        compute = compute_corrected_value(revision, entry)
         COMPUTATIONS.append(compute)
+        #print(f""" revised: {revision['REVISED']} \n revised quote: {revision['REVISION_QUOTE']} """) need to have a parser for revision before use
         print(revision)
-        print("--computes:--")
         print(compute)
-        print("--end of loop--")
-for r in REVISIONS:
-    continue
-    
+        print("----------------")
+#Check the response 
+def  main():
+    ENTRIES = parse_entries(run_checklist(CHUNK, CHECKLIST)) #pure reponse list
+    REPORT = verified_categorizer(verify(ENTRIES, CHUNK)) #reponse list either verify
+    REVISIONS = []
+    COMPUTATIONS = []
+    show_entry(REPORT,REVISIONS,COMPUTATIONS)
+            
+    for r in REVISIONS:
+        continue
+
+if __name__ == "__main__":
+    main()

@@ -1,6 +1,8 @@
 """ used for testing the revision-check 
 function against a stale amount entry. """
-from py_compile import main
+from py_compile import(
+    main,
+) 
 import re
 
 CHUNK = """The invoice was issued on March 3rd, 2024, to Acme
@@ -8,7 +10,6 @@ CHUNK = """The invoice was issued on March 3rd, 2024, to Acme
 "$4,250.00. No late fee schedule is mentioned in this section. 
 " They felt bad about that total amount due and made it a 
 "thousand dollars less."""
-
 # Simulating Gemma's actual raw output from your test
 RAW_OUTPUT = """ITEM: Does this chunk state a specific due date for payment?
 ANSWER: YES
@@ -25,7 +26,6 @@ QUOTE: The invoice was issued to Acme Corp.
 ITEM: What's the amount due?
 ANSWER: $4,250.00
 QUOTE: The total amount due is $4,250.00"""
-
 #Small prompt for the reviser model
 REVISION_CHECK_PROMPT = """You are checking whether a previously 
 extracted answer is still accurate given the FULL source chunk below.
@@ -57,10 +57,11 @@ ITEM: {item}
 ANSWER: {answer}
 QUOTE: {quote}
 Status: {status}
+category: {category}
 Does any OTHER sentence in the chunk revise this SPECIFIC fact (not some other fact in the chunk)?
 Only answer YES if the revising sentence is clearly talking about the same thing as the ANSWER above.
 If the only candidate sentence you can find is about a different fact, answer NO.
-Do NOT calculate the corrected value yourself. Only extract the raw numbers.
+Do NOT calculate the corrected value yourself. Only extract the raw numbers. 
 Respond in exactly this format:
 
 REVISED: YES or NO
@@ -89,6 +90,7 @@ def compute_corrected_value(revision_result_text, entry = None):
         return None #its not revised so theres nothing to compute
 
     if entry and is_self_referential(entry, fields):
+        print("it is self referentially revising here, so ignore this revision")
         return None # catches false positive when the revision cites itself.
     
     direction = fields.get("DELTA_DIRECTION", "NONE")
@@ -148,17 +150,24 @@ def verify(entries, chunk):
         report.append({**e, "status": status})
     return report
 
+def verified_categorizer(entries):
+    #report(first pass) = [{'item': 'Does this chunk state a specific due date for payment?', 'answer': 'YES', 'quote': 'The invoice was issued on March 3rd, 2024', 'status': 'VERIFIED', 'category': 'DETERMINISTIC'}]
+    report = []
+    for e in entries:
+        answer_type = "UNCATEGORIZED"
+        if e['status'] == "VERIFIED" and e['answer'] in ("YES", "NO"):
+            answer_type = "DETERMINISTIC"
+        report.append({**e,"category":answer_type})
+    return report
+
 def mock_chat(prompt):
     """Simulates what gemma3:4b *should* say if it reasons over the whole chunk."""
     return "" + prompt 
-#+ "\nREVISED: YES \nREVISION_QUOTE: They felt bad about that total amount due and made it a thousand dollars less. \nCORRECTED_ANSWER: $3,250.00"
 
-#this function is from claudes 
-#"Add and test a revision-check function against the stale amount entry""
 def check_for_revision(chunk, entry, chat_fn):
-    """chat_fn is passed in so this stays testable without a live model call."""
+    """checks the model's initial output for revision"""
     prompt = REVISION_EXTRACT_PROMPT.format(
-        chunk=chunk, item=entry['item'], answer=entry['answer'], quote=entry['quote'], status=entry['status']
+        chunk=chunk, category=entry['category'], item=entry['item'], answer=entry['answer'], quote=entry['quote'], status=entry['status']
     )
     return chat_fn(prompt)
 
