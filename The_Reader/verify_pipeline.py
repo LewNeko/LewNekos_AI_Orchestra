@@ -58,7 +58,10 @@ ANSWER: {answer}
 QUOTE: {quote}
 Status: {status}
 category: {category}
+
 Does any OTHER sentence in the chunk revise this SPECIFIC fact (not some other fact in the chunk)?
+Does the revision quote refer to the same entity/subject as the original quote?
+A sentence is only a revision if it refers to the same subject.
 Only answer YES if the revising sentence is clearly talking about the same thing as the ANSWER above.
 If the only candidate sentence you can find is about a different fact, answer NO.
 Do NOT calculate the corrected value yourself. Only extract the raw numbers. 

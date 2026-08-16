@@ -29,14 +29,37 @@ class OllamaBackend(ModelBackend):
     def __init__(self, model: str = "qwen3:4b", host: str = "http://localhost:11434"):
         self.model = model
         self.url = f"{host}/v1/chat/completions"
+        # Check if the model supports tools by querying the Ollama API for model details.
+        details = requests.post(
+            f"{host}/api/show",
+            json={"model": self.model},
+            timeout=10,
+        ).json()
+        # Extract the list of capabilities from the model details.
+        capabilities = details.get("capabilities", [])
+        # Check if the model supports tools. 
+        # Ollama's API returns a list of capabilities, 
+        # and "tools" is one of them if the model can handle tool calls.
+        if "tools" not in capabilities:
+            raise RuntimeError(
+                f"Model '{self.model}' does not support tools. "
+                f"Capabilities: {', '.join(capabilities) or 'none'}."
+            )
 
     def chat(self, messages: list, tools: list = None) -> dict:
+        
+        
         payload = {"model": self.model, "messages": messages}
         if tools:
             payload["tools"] = tools
 
         resp = requests.post(self.url, json=payload, timeout=120)
         resp.raise_for_status()
+        if resp.status_code != 200:
+            raise requests.exceptions.HTTPError(f"""
+            Ollama API error: {resp.status_code} {resp.text}
+(^_^)/ yo, looks like the model you selected may not be capable of tool calls.
+ Try a different model or remove the tools argument.""")
         data = resp.json()
 
         choice = data["choices"][0]["message"]
@@ -112,21 +135,21 @@ def _openai_tools_to_anthropic(tools: list) -> list:
 
 
 # ---- Backend registry: this is the "swap" switch ----
-BACKENDS = {
-    """
+"""
 qwen3:4b is at home, no need to use it if device can use a stronger version.
 qwen3-coder is massive, please do not use it casually.
 
 qwen3-coder:latest       06c1097efce0    18 GB     STRONGEST
 qwen3:8b                 500a1f067a9f    5.2 GB    Good
 embeddinggemma:latest    85462619ee72    621 MB    functionality
-gemma3:4b                a2af6cc3eb7f    3.3 GB    Everyday Use
+gemma3:4b                a2af6cc3eb7f    3.3 GB    
 """
+BACKENDS = {
     "ollama-qwen3:4b": lambda: OllamaBackend(model="qwen3:4b"),
     "ollama-qwen3:8b": lambda: OllamaBackend(model="qwen3:8b"),
     "ollama-qwen3-coder": lambda: OllamaBackend(model="qwen3-coder:latest"),
     "ollama-embed4gemma": lambda: OllamaBackend(model="embeddinggemma:latest"),
-    "ollama-gemma3:4b": lambda: OllamaBackend(model="gemma3:4b"),
+    "ollama": lambda: OllamaBackend(model="gemma3:4b"),
     "claude": lambda: ClaudeBackend(model="claude-sonnet-5"),
 }
 

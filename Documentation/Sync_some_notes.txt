@@ -55,7 +55,6 @@ i want to find a real way to tackle this second item because i don't know how to
 
 AI reply
 
-i don't know how to even fix that one compared to the others.
 I think the second item exposes a deeper issue in the reviser prompt design.
 
 For the question:
@@ -229,11 +228,42 @@ compute_corrected_value(...)
 
 That solves all three of your examples:
 
-Item	Candidate Revision Found?	Same Subject?	Revision Applied?Due date	No	No	No
+Item	Candidate Revision Found?	Same Subject?	Revision Applied?
+Due date	No	No	No
 Late fee	Yes	No	No
 Amount due	Yes	Yes	Yes
 
-The interesting thing is that the second failure isn't really a math problem or even a revision problem. 
-It's a fact-linking problem. Your reviser needs to prove that a candidate revision refers to the same underlying 
+The interesting thing is that the second failure isn't really a math 
+problem or even a revision problem. 
+It's a fact-linking problem. Your reviser needs to prove that a 
+candidate revision refers to the same underlying 
 fact before it's allowed to compute anything. 
 The amount-due case already gives you the pattern to validate against.
+
+regarding the orchestrator below ///////////////////////////////////////////////////////
+Mostly—your capability check is correct. It calls the right endpoint (/api/show) and 
+correctly detects that gemma3:4b has only completion, vision.
+It now produces this clear core error:
+RuntimeError: Model 'gemma3:4b' does not support tools.
+Capabilities: completion, vision.
+But it is not fully “graceful” yet, because Python still prints 
+a traceback. That’s because no code in orchestrator.py catches 
+the RuntimeError at the command-line entry point.
+Two changes to consider:
+Your if resp.status_code != 200: block will never run.
+resp.raise_for_status() immediately before it already raises 
+on every 4xx/5xx response. Put custom handling before that call, 
+or catch the exception around it.
+
+The check currently runs in OllamaBackend.__init__, even if a 
+future caller wants ordinary chat without tools. That’s fine if this 
+project is always an agent, but otherwise check only when 
+chat(..., tools=...) receives tools.
+
+Also, avoid saying every HTTP 400 means “the model may not be capable 
+of tool calls.” A 400 can also mean malformed JSON, an invalid tool 
+schema, or an invalid conversation history. Your metadata check is
+ the reliable way to identify the unsupported-model case.
+So: correct detection, but the custom HTTP message is unreachable,
+ and graceful terminal output needs one final try/except
+  in the CLI section.
