@@ -1,5 +1,7 @@
 """so i can use the models"""
-from ollama import chat
+import os
+import sys
+from backends import get_backend
 
 """from verify pipeline"""
 from verify_pipeline import (
@@ -32,39 +34,29 @@ Do not paraphrase the quote. Do not answer YES if you cannot produce an exact qu
 CHUNK: {CHUNK}
 CHECKLIST: {CHECKLIST} 
 """
-MODEL = "qwen3:8b"
+# Pick the backend once, here. Order of precedence: CLI arg -> BACKEND env var -> default.
+# Run e.g. `python ProofOfConcept.py claude` or `python ProofOfConcept.py ollama-qwen3-coder`
+# See backends.py's BACKENDS dict for the full list of valid names.
+BACKEND_NAME = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("BACKEND", "ollama-qwen3:8b")
+backend = get_backend(BACKEND_NAME)
 
 def run_checklist(chunk, checklist):
     prompt = CHECK_PROMPT.format(
         CHUNK=chunk,
         CHECKLIST="\n".join(f"-{item}" for item in checklist)
     )
-    response = chat(
-        MODEL,
-        messages=[
-            {
-                "role":"user",
-                "content":prompt
-            }
-        ]
-    )
-    return response.message.content
+    reply = backend.chat([{"role": "user", "content": prompt}])
+    return reply["content"]
 
-def chat_fn (prompt):
-    response = chat(
-        MODEL,
-        messages=[
-            {
-                "role":"user",
-                "content":prompt
-            }
-        ]
-    )
-    return response.message.content
+def chat_fn(prompt):
+    reply = backend.chat([{"role": "user", "content": prompt}])
+    return reply["content"]
 
 #uses check_for_revision and compute_corrected_value
 def show_entry(report, REVISIONS, COMPUTATIONS):
     """prints the"""
+    REVISIONS = []
+    COMPUTATIONS = []
     for entry in report:
         print(f"""
         status: {entry['status']} 

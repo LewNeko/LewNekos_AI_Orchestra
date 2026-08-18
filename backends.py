@@ -59,7 +59,7 @@ class OllamaBackend(ModelBackend):
             raise requests.exceptions.HTTPError(f"""
             Ollama API error: {resp.status_code} {resp.text}
 (^_^)/ yo, looks like the model you selected may not be capable of tool calls.
- Try a different model or remove the tools argument.""")
+ Try a different model or remove the tools argument. (this is the only reason an error may occurr here)""")
         data = resp.json()
 
         choice = data["choices"][0]["message"]
