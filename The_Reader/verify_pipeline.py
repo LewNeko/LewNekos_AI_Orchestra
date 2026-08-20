@@ -1,4 +1,7 @@
-""" used for testing the revision-check 
+""" 
+verify_pipeline.py
+----------------
+used for testing the revision-check 
 function against a stale amount entry. """
 from py_compile import(
     main,

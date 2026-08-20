@@ -1,9 +1,5 @@
-"""so i can use the models"""
-import os
-import sys
-from backends import get_backend
-
-"""from verify pipeline"""
+"""
+Proof of Concept for using the verification pipeline"""
 from verify_pipeline import (
     check_for_revision,
     compute_corrected_value,
@@ -11,6 +7,11 @@ from verify_pipeline import (
     verified_categorizer,
     verify,
 )
+import os
+import sys
+from backends import get_backend
+"""from verify pipeline"""
+
 
 CHUNK = """
 The invoice was issued on March 3rd, 2024, to Acme Corp. Payment terms are net-30. The total amount due is $4,250.00. No late fee schedule is mentioned in this section. 

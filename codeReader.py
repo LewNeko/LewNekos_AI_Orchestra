@@ -1,4 +1,6 @@
-import requests, json, re
+import re
+import requests
+import json
 from pathlib import Path
 
 OLLAMA_URL = "http://localhost:11434/api/chat"

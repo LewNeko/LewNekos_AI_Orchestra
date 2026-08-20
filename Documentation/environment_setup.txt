@@ -1,0 +1,3 @@
+create a virtual environment and use pip to download the packages and depandancies
+then you can use 
+"pip freeze > requirement.txt to make the packages in the environment
