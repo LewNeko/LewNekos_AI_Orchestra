@@ -11,3 +11,19 @@ Examples
 - give it a past reference that largely matches what you want.
 
 This is PRIME,
+
+aider help look at repos and at on code like codex?
+# Clone the repository
+git clone git@github.com:Aider-AI/aider.git
+
+# Navigate to the project directory
+cd aider
+
+# It's recommended to make a virtual environment
+
+# Install aider in editable/development mode, 
+# so it runs from the latest copy of these source files
+python -m pip install -e .
+
+# Run the local version of aider
+python -m aider

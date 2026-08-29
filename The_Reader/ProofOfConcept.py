@@ -2,7 +2,7 @@
 from ollama import chat
 
 """from verify pipeline"""
-from verify_pipeline import (
+from The_Reader.verify_pipeline2 import (
     check_for_revision,
     compute_corrected_value,
     parse_entries,

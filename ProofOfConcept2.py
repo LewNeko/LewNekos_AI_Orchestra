@@ -14,10 +14,9 @@ if str(PROJECT_ROOT) not in sys.path:
 # is not at the top of the file. 
 # This is necessary because we need to modify 
 # sys.path before importing. other backends.py import breaks stuff
-from .verify_pipeline import ( # noqa: E402
-    check_for_revision,
-    compute_corrected_value,
+from .The_Reader.verify_pipeline2 import ( # noqa: E402
     parse_entries,
+    run_entry_loop,
     verified_categorizer,
     verify,
 )
@@ -64,44 +63,28 @@ def chat_fn(prompt):
     reply = backend.chat([{"role": "user", "content": prompt}])
     return reply["content"]
 
-#uses check_for_revision and compute_corrected_value
-def show_entry(report, REVISIONS, COMPUTATIONS):
-    """prints the"""
-    REVISIONS = []
-    COMPUTATIONS = []
-    for entry in report:
+def print_final_report(records):
+    """Every record here is terminal - nothing gets silently dropped anymore."""
+    for r in records:
         print(f"""
-        status: {entry['status']} 
-        question: {entry['item']}
-        answer: {entry['answer']}
-        quote:  {entry['quote']}
-        category: {entry['category']}""")
-        if entry['category'] == "DETERMINISTIC":
-            print("A different revision will be given for deterministic answers")
-            print("----------------")
-            continue
-        if entry['status'] == "UNVERIFIED_QUOTE":
-            print("Either or a warning or correction step will be taken for this")
-            print("----------------")
-            continue
-        revision = check_for_revision(CHUNK, entry, chat_fn)
-        REVISIONS.append(revision)
-        compute = compute_corrected_value(revision, entry)
-        COMPUTATIONS.append(compute)
-        #print(f""" revised: {revision['REVISED']} \n revised quote: {revision['REVISION_QUOTE']} """) need to have a parser for revision before use
-        print(revision)
-        print(compute)
+        item: {r['item']}
+        final_status: {r['final_status']}
+        final_answer: {r['final_answer']}
+        quote: {r.get('quote')}
+        (initial_answer was: {r['initial_answer']})""")
+        if r.get("revision_quote"):
+            print(f"        revision_quote: {r['revision_quote']}")
+            print(f"        operation: {r.get('operation')}  delta: {r.get('delta')}")
+        if r.get("reason"):
+            print(f"        reason: {r['reason']}")
         print("----------------")
-#Check the response 
-def  main():
-    ENTRIES = parse_entries(run_checklist(CHUNK, CHECKLIST)) #pure reponse list
-    REPORT = verified_categorizer(verify(ENTRIES, CHUNK)) #reponse list either verify
-    REVISIONS = []
-    COMPUTATIONS = []
-    show_entry(REPORT,REVISIONS,COMPUTATIONS)
-            
-    for r in REVISIONS:
-        continue
+
+#Check the response
+def main():
+    ENTRIES = parse_entries(run_checklist(CHUNK, CHECKLIST))  # pure response list
+    REPORT = verified_categorizer(verify(ENTRIES, CHUNK))     # response list, quote-verified + categorized
+    FINAL = run_entry_loop(REPORT, CHUNK, chat_fn)             # closes the loop: repair -> support check -> revision check
+    print_final_report(FINAL)
 
 if __name__ == "__main__":
     main()

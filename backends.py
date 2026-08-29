@@ -28,18 +28,21 @@ class OllamaBackend(ModelBackend):
 
     def __init__(self, model: str = "qwen3:4b", host: str = "http://localhost:11434"):
         self.model = model
+        self.host = host
         self.url = f"{host}/v1/chat/completions"
-        # Check if the model supports tools by querying the Ollama API for model details.
-        details = requests.post(
-            f"{host}/api/show",
+
+    def _ensure_tool_support(self) -> None:
+        """Raise a clear error only when the caller asks to use tools."""
+        response = requests.post(
+            f"{self.host}/api/show",
             json={"model": self.model},
             timeout=10,
-        ).json()
-        # Extract the list of capabilities from the model details.
-        capabilities = details.get("capabilities", [])
-        # Check if the model supports tools. 
-        # Ollama's API returns a list of capabilities, 
-        # and "tools" is one of them if the model can handle tool calls.
+        )
+        if response.status_code == 404:
+            raise RuntimeError(f"Ollama model '{self.model}' is not installed.")
+        response.raise_for_status()
+
+        capabilities = response.json().get("capabilities", [])
         if "tools" not in capabilities:
             raise RuntimeError(
                 f"Model '{self.model}' does not support tools. "
@@ -51,9 +54,15 @@ class OllamaBackend(ModelBackend):
         
         payload = {"model": self.model, "messages": messages}
         if tools:
+            self._ensure_tool_support()
             payload["tools"] = tools
 
-        resp = requests.post(self.url, json=payload, timeout=120)
+        resp = requests.post(self.url, json=payload)
+        #previously had timeout=120, 
+        # but that was causing issues with some models
+        #i intend to later add a timeout exception so it doesn't break
+        #but says its thinking and repeats the message until the model
+        #  is done, so i think its fine to remove the timeout for now
         resp.raise_for_status()
         if resp.status_code != 200:
             raise requests.exceptions.HTTPError(f"""
