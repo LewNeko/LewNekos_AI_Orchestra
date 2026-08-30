@@ -1,14 +1,28 @@
-"""so i can use the models"""
-from ollama import chat
+"""
+Proof of Concept for using the verification pipeline
+"""
+#usage: python -m The_Reader.ProofOfConcept ollama
+#command should be run from the root of the repo, not from The_Reader folder.
+from pathlib import Path
+import sys
+import os
 
-"""from verify pipeline"""
-from The_Reader.verify_pipeline2 import (
-    check_for_revision,
-    compute_corrected_value,
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# noqa: E402 is a ruff directive to ignore that the import 
+# is not at the top of the file. 
+# This is necessary because we need to modify 
+# sys.path before importing. other backends.py import breaks stuff
+from .verify_pipeline import ( # noqa: E402
     parse_entries,
+    run_entry_loop,
     verified_categorizer,
     verify,
 )
+from backends import get_backend # noqa: E402
+
 
 CHUNK = """
 The invoice was issued on March 3rd, 2024, to Acme Corp. Payment terms are net-30. The total amount due is $4,250.00. No late fee schedule is mentioned in this section. 
@@ -21,6 +35,15 @@ CHECKLIST = [
     "Does this chunk name the company being invoiced?",
     "What's the amount due?",
 ]
+
+# This routing belongs to the checklist definition, not to the model's answer.
+# A wrong YES/NO from the model must not decide which verifier handles it.
+FACT_TYPES = {
+    "Does this chunk state a specific due date for payment?": "existence",
+    "Does this chunk mention a late fee or penalty amount?": "existence",
+    "Does this chunk name the company being invoiced?": "name",
+    "What's the amount due?": "numeric",
+}
 CHECK_PROMPT="""
 You are verifying facts against a source text chunk. For each checklist item, respond in this exact format:
 ITEM: <checklist item>
@@ -32,72 +55,46 @@ Do not paraphrase the quote. Do not answer YES if you cannot produce an exact qu
 CHUNK: {CHUNK}
 CHECKLIST: {CHECKLIST} 
 """
-MODEL = "qwen3:8b"
+# Pick the backend once, here. Order of precedence: CLI arg -> BACKEND env var -> default.
+# Run e.g. `python ProofOfConcept.py claude` or `python ProofOfConcept.py ollama-qwen3-coder`
+# See backends.py's BACKENDS dict for the full list of valid names.
+BACKEND_NAME = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("BACKEND", "ollama-qwen3:4b")
+backend = get_backend(BACKEND_NAME)
 
 def run_checklist(chunk, checklist):
     prompt = CHECK_PROMPT.format(
         CHUNK=chunk,
         CHECKLIST="\n".join(f"-{item}" for item in checklist)
     )
-    response = chat(
-        MODEL,
-        messages=[
-            {
-                "role":"user",
-                "content":prompt
-            }
-        ]
-    )
-    return response.message.content
+    reply = backend.chat([{"role": "user", "content": prompt}])
+    return reply["content"]
 
-def chat_fn (prompt):
-    response = chat(
-        MODEL,
-        messages=[
-            {
-                "role":"user",
-                "content":prompt
-            }
-        ]
-    )
-    return response.message.content
+def chat_fn(prompt):
+    reply = backend.chat([{"role": "user", "content": prompt}])
+    return reply["content"]
 
-#uses check_for_revision and compute_corrected_value
-def show_entry(report, REVISIONS, COMPUTATIONS):
-    """prints the"""
-    for entry in report:
+def print_final_report(records):
+    """Every record here is terminal - nothing gets silently dropped anymore."""
+    for r in records:
         print(f"""
-        status: {entry['status']} 
-        question: {entry['item']}
-        answer: {entry['answer']}
-        quote:  {entry['quote']}
-        category: {entry['category']}""")
-        if entry['category'] == "DETERMINISTIC":
-            print("A different revision will be given for deterministic answers")
-            print("----------------")
-            continue
-        if entry['status'] == "UNVERIFIED_QUOTE":
-            print("Either or a warning or correction step will be taken for this")
-            print("----------------")
-            continue
-        revision = check_for_revision(CHUNK, entry, chat_fn)
-        REVISIONS.append(revision)
-        compute = compute_corrected_value(revision, entry)
-        COMPUTATIONS.append(compute)
-        #print(f""" revised: {revision['REVISED']} \n revised quote: {revision['REVISION_QUOTE']} """) need to have a parser for revision before use
-        print(revision)
-        print(compute)
+        item: {r['item']}
+        final_status: {r['final_status']}
+        final_answer: {r['final_answer']}
+        quote: {r.get('quote')}
+        (initial_answer was: {r['initial_answer']})""")
+        if r.get("revision_quote"):
+            print(f"        revision_quote: {r['revision_quote']}")
+            print(f"        operation: {r.get('operation')}  delta: {r.get('delta')}")
+        if r.get("reason"):
+            print(f"        reason: {r['reason']}")
         print("----------------")
-#Check the response 
-def  main():
-    ENTRIES = parse_entries(run_checklist(CHUNK, CHECKLIST)) #pure reponse list
-    REPORT = verified_categorizer(verify(ENTRIES, CHUNK)) #reponse list either verify
-    REVISIONS = []
-    COMPUTATIONS = []
-    show_entry(REPORT,REVISIONS,COMPUTATIONS)
-            
-    for r in REVISIONS:
-        continue
+
+#Check the response
+def main():
+    ENTRIES = parse_entries(run_checklist(CHUNK, CHECKLIST))  # pure response list
+    REPORT = verified_categorizer(verify(ENTRIES, CHUNK), FACT_TYPES)
+    FINAL = run_entry_loop(REPORT, CHUNK, chat_fn)             # closes the loop: repair -> support check -> revision check
+    print_final_report(FINAL)
 
 if __name__ == "__main__":
     main()
