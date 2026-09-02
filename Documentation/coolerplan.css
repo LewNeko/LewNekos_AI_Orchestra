@@ -1,0 +1,583 @@
+/* =========================================================
+   LOCAL AGENTIC DOCUMENT INTELLIGENCE ORCHESTRA
+   Steam-inspired presentation
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap');
+
+:root {
+    --bg: #0b1017;
+    --bg-deep: #070b10;
+    --panel: #111923;
+    --panel-light: #172331;
+    --panel-hover: #1b2a3a;
+
+    --text: #d6e2ef;
+    --text-soft: #9aaabd;
+    --text-muted: #65758a;
+
+    --accent: #66c0f4;
+    --accent-bright: #8bd5ff;
+    --accent-dark: #1a9fff;
+
+    --green: #67c1a3;
+    --yellow: #d9b44a;
+    --red: #e56b6f;
+
+    --border: rgba(103, 192, 244, 0.16);
+    --border-strong: rgba(103, 192, 244, 0.32);
+
+    --shadow:
+        0 12px 35px rgba(0, 0, 0, 0.35);
+
+    --glow:
+        0 0 35px rgba(102, 192, 244, 0.10);
+
+    --radius: 5px;
+}
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    color: var(--text);
+    background:
+        radial-gradient(
+            ellipse at 50% -10%,
+            rgba(30, 111, 170, 0.22),
+            transparent 55%
+        ),
+        radial-gradient(
+            ellipse at 100% 40%,
+            rgba(20, 70, 120, 0.10),
+            transparent 50%
+        ),
+        var(--bg);
+
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+/* subtle technical grid */
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+
+    opacity: 0.035;
+
+    background-image:
+        linear-gradient(rgba(255,255,255,.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.4) 1px, transparent 1px);
+
+    background-size: 48px 48px;
+}
+
+/* =========================================================
+   MAIN DOCUMENT
+   ========================================================= */
+
+body > * {
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h1,
+h2,
+h3 {
+    color: white;
+}
+
+h1 {
+    position: relative;
+
+    margin-top: 0;
+    padding: 80px 60px 70px;
+
+    font-family: "Rajdhani", sans-serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    line-height: .92;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(27, 65, 96, .95),
+            rgba(13, 25, 38, .96)
+        );
+
+    border: 1px solid var(--border);
+    border-radius: 0 0 7px 7px;
+
+    box-shadow:
+        0 30px 70px rgba(0,0,0,.5),
+        inset 0 -1px 0 rgba(255,255,255,.04);
+
+    overflow: hidden;
+}
+
+/* Hero light */
+
+h1::before {
+    content: "";
+
+    position: absolute;
+    width: 500px;
+    height: 500px;
+
+    top: -250px;
+    right: -100px;
+
+    background: radial-gradient(
+        circle,
+        rgba(102,192,244,.28),
+        transparent 65%
+    );
+
+    pointer-events: none;
+}
+
+/* little "system" line */
+
+h1::after {
+    content: "LOCAL INTELLIGENCE SYSTEM // ARCHITECTURE";
+    
+    position: absolute;
+    left: 62px;
+    bottom: 28px;
+
+    color: var(--accent);
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .18em;
+    opacity: .75;
+}
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+h2 {
+    position: relative;
+
+    margin-top: 70px;
+    padding: 22px 28px;
+
+    font-family: "Rajdhani", sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+
+    text-transform: uppercase;
+    letter-spacing: .035em;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(30, 65, 95, .8),
+            rgba(17,25,35,.35)
+        );
+
+    border-left: 4px solid var(--accent);
+    border-bottom: 1px solid var(--border);
+
+    box-shadow: var(--glow);
+}
+
+/* Section number atmosphere */
+
+h2::before {
+    content: "SYSTEM";
+    position: absolute;
+    right: 20px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: rgba(255,255,255,.025);
+
+    font-family: "Rajdhani", sans-serif;
+    font-size: 4rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+
+    pointer-events: none;
+}
+
+h3 {
+    margin-top: 45px;
+    margin-bottom: 15px;
+
+    font-family: "Rajdhani", sans-serif;
+    font-size: 1.45rem;
+    letter-spacing: .02em;
+
+    color: var(--accent-bright);
+}
+
+/* =========================================================
+   TEXT
+   ========================================================= */
+
+p,
+li {
+    color: var(--text);
+}
+
+p {
+    margin: 1.1rem 0;
+}
+
+strong {
+    color: white;
+}
+
+em {
+    color: #b9dfff;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color .2s ease;
+}
+
+a:hover {
+    color: white;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    margin: 65px 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--border-strong),
+            transparent
+        );
+}
+
+/* =========================================================
+   LISTS
+   ========================================================= */
+
+ul,
+ol {
+    padding-left: 2rem;
+}
+
+li {
+    margin: .55rem 0;
+}
+
+li::marker {
+    color: var(--accent);
+}
+
+/* =========================================================
+   CODE
+   ========================================================= */
+
+code {
+    padding: .15em .4em;
+
+    color: #9ddcff;
+
+    background: rgba(0,0,0,.35);
+
+    border: 1px solid rgba(102,192,244,.10);
+    border-radius: 3px;
+
+    font-family:
+        "Cascadia Code",
+        "JetBrains Mono",
+        monospace;
+
+    font-size: .9em;
+}
+
+pre {
+    position: relative;
+
+    margin: 30px 0;
+    padding: 28px 30px;
+
+    overflow-x: auto;
+
+    color: #c8d7e5;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(16, 27, 39, .98),
+            rgba(7, 12, 18, .98)
+        );
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.025),
+        0 15px 35px rgba(0,0,0,.3);
+
+    font-family:
+        "Cascadia Code",
+        "JetBrains Mono",
+        monospace;
+
+    font-size: .9rem;
+    line-height: 1.55;
+}
+
+/* glowing left edge */
+
+pre::before {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 2px;
+
+    background: var(--accent);
+    opacity: .65;
+
+    box-shadow:
+        0 0 12px rgba(102,192,244,.45);
+}
+
+/* =========================================================
+   BLOCKQUOTES
+   ========================================================= */
+
+blockquote {
+    position: relative;
+
+    margin: 45px 0;
+    padding: 30px 35px 30px 42px;
+
+    background:
+        linear-gradient(
+            120deg,
+            rgba(38, 83, 120, .42),
+            rgba(14, 23, 33, .65)
+        );
+
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--accent);
+
+    box-shadow: var(--shadow);
+}
+
+blockquote::before {
+    content: "“";
+
+    position: absolute;
+    left: 18px;
+    top: 8px;
+
+    color: rgba(102,192,244,.25);
+
+    font-family: Georgia, serif;
+    font-size: 5rem;
+    line-height: 1;
+}
+
+blockquote p {
+    position: relative;
+    z-index: 1;
+
+    color: #dceeff;
+    font-size: 1.15rem;
+    font-weight: 500;
+}
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+table {
+    width: 100%;
+    margin: 35px 0;
+
+    border-collapse: separate;
+    border-spacing: 0;
+
+    background: var(--panel);
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    overflow: hidden;
+
+    box-shadow: var(--shadow);
+}
+
+th {
+    padding: 15px 18px;
+
+    color: white;
+    background:
+        linear-gradient(
+            180deg,
+            #1b3145,
+            #152536
+        );
+
+    text-align: left;
+
+    font-family: "Rajdhani", sans-serif;
+    font-size: 1rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+
+    border-bottom: 1px solid var(--border-strong);
+}
+
+td {
+    padding: 15px 18px;
+
+    color: var(--text-soft);
+
+    border-bottom: 1px solid rgba(255,255,255,.045);
+}
+
+tr:last-child td {
+    border-bottom: 0;
+}
+
+tbody tr {
+    transition:
+        background .18s ease,
+        transform .18s ease;
+}
+
+tbody tr:hover {
+    background: rgba(102,192,244,.06);
+}
+
+/* =========================================================
+   ARCHITECTURE / DIAGRAM BLOCKS
+   ========================================================= */
+
+/*
+   Your document uses <pre> heavily for architecture diagrams.
+   Give those diagrams more visual importance.
+*/
+
+pre:not(code pre) {
+    min-height: 60px;
+}
+
+/* =========================================================
+   SPECIAL CALLOUTS
+   ========================================================= */
+
+p strong:first-child {
+    color: white;
+}
+
+/* Make architecture concepts feel like "cards" */
+
+h3 + p {
+    position: relative;
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #080d13;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #26394b;
+    border-radius: 4px;
+
+    border: 2px solid #080d13;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3b5972;
+}
+
+/* =========================================================
+   SELECTION
+   ========================================================= */
+
+::selection {
+    background: rgba(102,192,244,.28);
+    color: white;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+    h1 {
+        padding: 55px 30px 65px;
+        font-size: 3rem;
+    }
+
+    h1::after {
+        left: 32px;
+        font-size: 9px;
+    }
+
+    h2 {
+        padding: 18px 20px;
+        font-size: 1.6rem;
+    }
+
+    pre {
+        padding: 22px 20px;
+        font-size: .8rem;
+    }
+
+    body {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 500px) {
+
+    h1 {
+        font-size: 2.4rem;
+    }
+
+    h1::after {
+        display: none;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+}

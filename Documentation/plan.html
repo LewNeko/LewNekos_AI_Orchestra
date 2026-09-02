@@ -1,0 +1,555 @@
+<link rel="stylesheet" href="plan.css">
+<h1>Local Agentic Document Intelligence Orchestra</h1>
+<h2>Project Vision</h2>
+<p>Build a model-independent, locally runnable agentic system that can reason over large collections of documents without requiring the entire document corpus to be placed into the model's context window.</p>
+<p>The system combines four complementary ideas:</p>
+<ol>
+<li><strong>Model-independent agent orchestration</strong> from <code>LewNekos_AI_Orchestra</code></li>
+<li><strong>Document retrieval, evidence, and audit tooling</strong> from the Sixfeetup <code>OrchestrateAgenticAI</code> project</li>
+<li><strong>Dynamic context discovery and relevance selection</strong>, inspired by Aider's repository-map architecture</li>
+<li><strong>Dynamic capability composition</strong>, inspired by Cordis (DeepSeek Harness's runtime) — held in reserve as an architectural pattern, not an early build target</li>
+</ol>
+<p>The system runs primarily with a local model such as Qwen through Ollama, while retaining the ability to switch to other model backends.</p>
+<p>The goal is not to reproduce any one of these systems. The goal is to combine their strongest architectural ideas into a more general, auditable system — and to be explicit, from the start, about where that system's judgment can be trusted and where it can't.</p>
+<hr>
+<h2>1. The Problem</h2>
+<p>Large-document AI systems have a fundamental context-management problem.</p>
+<p>A naive system places large amounts of source material directly into the model's context:</p>
+<pre><code>Large document collection
+        ↓
+       LLM
+        ↓
+      Answer
+</code></pre>
+<p>This becomes increasingly inefficient as the corpus grows.</p>
+<p>Retrieval-augmented generation improves this:</p>
+<pre><code>Documents
+    ↓
+Search / Retrieval
+    ↓
+Relevant chunks
+    ↓
+   LLM
+    ↓
+  Answer
+</code></pre>
+<p>However, a fixed retrieval pipeline still has a limitation: <strong>the model is largely constrained by what the retrieval system decided to retrieve before the model began reasoning.</strong> If the initial evidence is incomplete, the model may not know that additional relevant information exists elsewhere.</p>
+<p>A second, quieter problem sits underneath the first one: even when the model retrieves the right evidence, nothing forces a distinction between <em>what the evidence literally says</em> and <em>what the model concluded from it</em>. A system that conflates &quot;the text exists&quot; with &quot;the interpretation is correct&quot; will look reliable right up until it isn't.</p>
+<p>The proposed system therefore adds two layers on top of retrieval: a <strong>context-navigation layer</strong>, and a <strong>validation layer</strong> that keeps deterministic fact from semantic judgment at every step.</p>
+<hr>
+<h2>2. Core Architectural Idea</h2>
+<p>The system operates as an iterative loop:</p>
+<pre><code>        ┌──────────────────┐
+        │   Local Model     │
+        │   Qwen/Ollama     │
+        └────────┬──────────┘
+                  │
+          Reason about
+          current evidence
+                  │
+                  ▼
+        &quot;I need more context&quot;
+                  │
+                  ▼
+        ┌──────────────────┐
+        │  Context Engine   │
+        └────────┬──────────┘
+                  │
+     ┌────────────┼────────────┐
+     ▼             ▼            ▼
+  Search       Structure     Retrieve
+     │             │            │
+     └────────────┼────────────┘
+                  ▼
+             New evidence
+                  │
+                  ▼
+             Local Model
+                  │
+                ...repeat...
+                  │
+                  ▼
+            Final judgment
+</code></pre>
+<p>This creates a spiral rather than a simple retrieval circle. The model's understanding of the problem determines what information it requests next.</p>
+<p>A second spiral — introduced in Section 9a — governs <em>what the model is allowed to assert</em> at each turn of this loop.</p>
+<hr>
+<h2>3. The Four Foundational Projects</h2>
+<h3>A. LewNekos_AI_Orchestra — Orchestration Layer</h3>
+<p>Repository: <code>LewNeko/LewNekos_AI_Orchestra</code></p>
+<p>Provides the generic orchestration architecture. Key abstractions:</p>
+<p><strong><code>backends.py</code></strong> — defines how the orchestrator communicates with a model. The model must be replaceable without rewriting the orchestration system.</p>
+<pre><code>      Orchestrator
+           │
+           ▼
+      ModelBackend
+           │
+     ┌─────┴─────┐
+     ▼           ▼
+  Ollama       Claude
+</code></pre>
+<p><strong><code>tools.py</code></strong> — defines capabilities available to the model (<code>list_directory()</code>, <code>read_file()</code>, etc.). The orchestrator does not need to know the internal implementation of every tool.</p>
+<p><strong><code>orchestrator.py</code></strong> — the fundamental agent loop:</p>
+<pre><code>send request
+     ↓
+model decides whether a tool is needed
+     ↓
+execute tool
+     ↓
+return tool result
+     ↓
+model reasons again
+     ↓
+repeat until final answer
+</code></pre>
+<p>This is the foundation for the new system.</p>
+<h3>B. Sixfeetup — Document Intelligence Layer</h3>
+<p>Repository: <code>github.com/sixfeetup/2026_AllThingsAI_OrchestrateAgenticAI</code></p>
+<p>Provides specialized document infrastructure: parsing, clause extraction, SQLite storage, Chroma vector storage, semantic search, evidence retrieval, audit logging, evaluation criteria, MCP tooling, and structured document-processing scripts.</p>
+<p>Its architecture externalizes most of the actual reasoning to Claude Code:</p>
+<pre><code>document-eval.py
+     ↓
+retrieve evidence
+     ↓
+structured evidence output
+     ↓
+Claude Code
+     ↓
+reasoning / judgment
+</code></pre>
+<p>We reuse its document capabilities without making the overall system dependent on Claude Code.</p>
+<h3>C. Aider — Context Engineering Layer</h3>
+<p>Repository: <code>github.com/Aider-AI/aider</code></p>
+<p>Aider's repository map provides a structural representation of a large codebase and uses relevance/ranking mechanisms to determine which information should enter a limited token budget.</p>
+<p>The transferable idea:</p>
+<pre><code>Large information space
+        ↓
+Structural representation
+        ↓
+   Relevance analysis
+        ↓
+Small amount of high-value context
+        ↓
+        Model
+</code></pre>
+<p>Instead of &quot;put the entire document collection into Qwen,&quot; the system enables Qwen to ask: <em>&quot;What information exists, and which part should I inspect next?&quot;</em></p>
+<h3>D. Cordis — Runtime Composability Layer (architectural influence, not an early build target)</h3>
+<p>Cordis (used in DeepSeek Harness) treats models, tools, skills, sessions, and storage as mountable/unmountable plugins with <strong>reversible effects</strong> and <strong>reactive coeffects</strong>: components declare what they provide and require, and the runtime activates or deactivates them as dependencies come and go.</p>
+<p>This is genuinely relevant to a system that will eventually run many specialized agents (<code>Reader+OCR</code>, <code>Reader+Legal</code>, <code>Reader+Tables</code>), but Cordis's own API is explicitly unstable, and adopting it wholesale before the base system works would bury the project under infrastructure. We borrow the <em>pattern</em> — provides/requires/effects/lifecycle — not the implementation. See Section 15 for how this is staged.</p>
+<hr>
+<h2>4. Combined Architecture</h2>
+<pre><code>┌───────────────────────────────────────────────────────┐
+│                     LOCAL MODEL                        │
+│                    Qwen / Ollama                        │
+└──────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌───────────────────────────────────────────────────────┐
+│                     ORCHESTRATOR                        │
+│   Agent loop · Tool selection · Model interaction        │
+│   Termination                                            │
+└──────────────────────────┬────────────────────────────┘
+                            │
+              ┌─────────────┴─────────────┐
+              ▼                           ▼
+┌────────────────────────┐   ┌────────────────────────┐
+│    CONTEXT ENGINE       │   │      DOMAIN TOOLS        │
+│  Structural map          │   │  Document search          │
+│  Relevance ranking       │   │  Evidence retrieval       │
+│  Context expansion       │   │  Audit                    │
+│  Token budgeting         │   │  Document loading         │
+└────────────┬───────────┘   └────────────┬───────────┘
+             │                             │
+             └─────────────┬───────────────┘
+                            ▼
+┌───────────────────────────────────────────────────────┐
+│                     DOMAIN MODEL                        │
+│  Documents · Chunks · Claims · Evidence · Findings        │
+│  Sources · Verification status                          │
+└───────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>5. The Domain Model</h2>
+<p>The system uses a proper domain model rather than passing arbitrary strings and dictionaries between agents. This is not cosmetic — Section 6a shows a concrete case (<code>The_Reader</code>) where the <em>original</em> choice to mutate a generic dict was the actual source of a correctness bug.</p>
+<pre><code>Document                    Chunk
+├── source                  ├── document
+├── metadata                ├── location
+└── chunks                  ├── text
+                             └── metadata
+
+Claim                        Evidence
+├── statement                ├── supports claim
+├── source                   ├── contradicts claim
+└── status                   ├── source
+                              └── relevance
+
+Finding                      AuditRecord
+├── claim                    ├── action
+├── evidence                 ├── actor
+├── severity                 ├── timestamp
+└── verification status      └── evidence
+</code></pre>
+<p>This layer represents what the system knows. The orchestrator represents what the system does. The model represents how the system reasons. Those concerns stay separate.</p>
+<hr>
+<h2>6. Agents</h2>
+<h3>The_Chunker</h3>
+<p>Transforms raw documents into useful, identifiable chunks.</p>
+<pre><code>Document → The_Chunker → Chunks
+</code></pre>
+<h3>The_Reader — Local Temporal Reasoning</h3>
+<p><strong>Job, precisely stated:</strong> <em>given one chunk, establish the current state of each requested fact, with an auditable history of how that state was established.</em></p>
+<p>The Reader does <strong>not</strong> decide document-wide truth — that is The_Auditor's job. The Reader only ever answers: <em>&quot;Within this chunk, what is the latest state I can establish for this fact?&quot;</em></p>
+<h3>The_Auditor — Cross-Chunk Temporal Reasoning</h3>
+<p>Resolves state across chunks: <em>&quot;Does the claim established in Chunk 42 supersede the one established in Chunk 17?&quot;</em></p>
+<pre><code>The_Chunker
+    │  produces bounded, identifiable chunks
+    ▼
+The_Reader
+    │  &quot;What does THIS chunk establish about each fact?&quot;
+    │  produces claims + evidence + revisions + provenance
+    ▼
+The_Auditor
+    │  &quot;Across chunks, which facts supersede which?&quot;
+    │  resolves document-level state
+    ▼
+Canonical Fact History
+</code></pre>
+<p>This means a large document never needs to be dumped into The_Reader at once:</p>
+<pre><code>Document
+├── Chunk 1   → Reader → facts
+├── Chunk 2   → Reader → facts
+├── ...
+├── Chunk 500 → Reader → facts
+│
+└── Auditor
+      ├── Fact A history
+      ├── Fact B history
+      └── Fact C history
+</code></pre>
+<p>The audit trail itself becomes a compressed representation of what matters — closer to the intended architecture than plain RAG over a huge document.</p>
+<h3>The_Verifier</h3>
+<p>Actively attempts to disprove or weaken a finding rather than accepting the first evidence retrieved.</p>
+<pre><code>Read finding
+     ↓
+Search for counter-evidence
+     ↓
+Inspect related material
+     ↓
+Check audit trail
+     ↓
+Construct defense
+     ↓
+Render verdict
+</code></pre>
+<h3>The_Drafter</h3>
+<p>Turns verified findings into a final report or response.</p>
+<hr>
+<h2>6a. The_Reader in Detail — Fact History, Not a Mutated Dict</h2>
+<p>This section exists because The_Reader is the agent where &quot;the model might be subtly wrong&quot; first becomes concrete, and it's the template for how every other agent in this system should be built.</p>
+<h3>The original problem</h3>
+<p>An early implementation represented a fact as a single mutable structure:</p>
+<pre><code class="language-python">current = dict(entry)   # { &quot;item&quot;: ..., &quot;answer&quot;: ..., &quot;quote&quot;: ..., &quot;status&quot;: ... }
+</code></pre>
+<p>...and then repeatedly overwrote <code>current</code> as the pipeline ran: repair quote → check support → check revision → check relevance → compute correction → return final record.</p>
+<p>This is not a <em>conceptually</em> wrong pipeline — those are the right five operations. The problem is that mutation destroys the history. A revised amount and the original amount both end up called <code>answer</code>, so a downstream consumer can no longer tell &quot;the document originally said $4,250&quot; from &quot;the document currently says $3,250&quot; — both facts collapse into one field.</p>
+<h3>The fix: an immutable claim history</h3>
+<pre><code>FactRecord
+├── question:      &quot;What's the amount due?&quot;
+├── fact_type:     numeric
+├── claims:
+│     ├── Claim 1 — value: $4,250
+│     │            evidence: &quot;The total amount due is $4,250.00.&quot;
+│     └── Claim 2 — operation: DECREASE $1,000
+│                  evidence: &quot;...made it a thousand dollars less.&quot;
+└── current_state: value: $3,250, derived_from: Claim 2
+</code></pre>
+<p><code>$3,250</code> is never something the model asserted directly — it is a <strong>deterministic consequence</strong> of <code>$4,250 + DECREASE $1,000</code>, computed in Python. This also makes a specific bug class structurally impossible: a support judgment (<code>SUPPORTED</code> / <code>NOT_SUPPORTED</code>) can no longer be conflated with a fact value (<code>$4,250.00</code>), because they are different types:</p>
+<pre><code>FactValue        &quot;$4,250.00&quot;
+Evidence          &quot;The total amount due is $4,250.00.&quot;
+SupportJudgment   SUPPORTED
+RevisionEvent     DECREASE by $1,000
+ComputedValue     &quot;$3,250.00&quot;
+</code></pre>
+<h3>The governing principle: model proposes, Python validates</h3>
+<pre><code>                LLM
+                 │
+                 ▼
+          Proposed Structure
+                 │
+                 ▼
+        Deterministic Validation
+                 │
+          ┌──────┴──────┐
+          │             │
+       VALID         INVALID
+          │             │
+          ▼             ▼
+     Accept State    NEEDS_REVIEW
+</code></pre>
+<p>The model is allowed to propose: <em>&quot;I think this sentence revises the amount, the operation is DECREASE, the amount is 1000.&quot;</em> Python is responsible for checking: does that sentence actually exist in the evidence? Does the original value exist in the original evidence? Is this an operation we support? Can it be computed? Only then does the computed value get accepted into the fact's history.</p>
+<h3>Where this principle stops being sufficient — and what we do about it</h3>
+<p>Deterministic validation covers <strong>grounding</strong>: does the quoted text exist verbatim in the source, does the referenced value exist, is the arithmetic correct. It does not cover <strong>interpretation</strong>: whether a quote that genuinely exists in the evidence is actually a revision of <em>this</em> fact, or is relevant to it at all. <code>check_answer_support()</code> and <code>check_revision_relevance()</code> are semantic judgments — Python can confirm a quote is real, but not that the model's reading of what it means is correct.</p>
+<p>This is a real boundary, not a design flaw, and the plan treats it as one explicitly rather than leaving it implicit — see Section 9a.</p>
+<h3>Module layout</h3>
+<pre><code>The_Reader/
+├── models.py        QuestionSpec, Evidence, FactClaim, RevisionEvent,
+│                     FactHistory, ReaderResult
+├── parsing.py        parse_entries(), parse_revision()
+├── validation.py      verify_quote(), verify_original_value()
+├── reasoning.py       check_answer_support(), check_for_revision(),
+│                      check_revision_relevance()
+├── computation.py     compute_corrected_value()
+├── pipeline.py        process_entry(), run_reader()
+└── ProofOfConcept.py
+</code></pre>
+<p><code>process_entry()</code> produces a <code>ReaderResult</code> (question, fact_type, initial_claim, evidence, validation_results, revision_events, current_chunk_value, status) — it does not itself own the historical representation. A separate <code>FactHistory</code> builder constructs that from the result, so The_Reader's processing logic never becomes the database/state-management layer by accident.</p>
+<p>The existing prototype code maps onto this cleanly rather than being thrown away:</p>
+<table>
+<thead>
+<tr>
+<th>Existing function</th>
+<th>Future architectural role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>parse_entries()</code></td>
+<td>Model-output parser</td>
+</tr>
+<tr>
+<td><code>verify()</code></td>
+<td>Deterministic evidence validation</td>
+</tr>
+<tr>
+<td><code>verified_categorizer()</code></td>
+<td>Question → fact-type routing</td>
+</tr>
+<tr>
+<td><code>repair_quote()</code></td>
+<td>Evidence repair proposal</td>
+</tr>
+<tr>
+<td><code>check_answer_support()</code></td>
+<td>Semantic support judgment</td>
+</tr>
+<tr>
+<td><code>check_for_revision()</code></td>
+<td>Revision proposal</td>
+</tr>
+<tr>
+<td><code>check_revision_relevance()</code></td>
+<td>Semantic revision judgment</td>
+</tr>
+<tr>
+<td><code>original_value_matches_entry()</code></td>
+<td>Deterministic consistency check</td>
+</tr>
+<tr>
+<td><code>compute_corrected_value()</code></td>
+<td>Deterministic state transition</td>
+</tr>
+<tr>
+<td><code>format_amount()</code></td>
+<td>Presentation layer</td>
+</tr>
+<tr>
+<td><code>process_entry()</code></td>
+<td>Reader orchestration</td>
+</tr>
+</tbody>
+</table>
+<p>One implementation note carried forward into Phase 6 (Section 15): the standalone pipeline test and the actual proof-of-concept run different call paths today. The Phase 6 deliverable includes making the test suite exercise the same pipeline production uses, not a parallel one.</p>
+<hr>
+<h2>7. Context Engine</h2>
+<p>Not merely vector search. It answers: <em>&quot;Given what the model currently knows and what it is trying to accomplish, what information should enter the context next?&quot;</em></p>
+<pre><code>inspect_structure()
+search()
+retrieve()
+expand_context()
+find_references()
+find_related_claims()
+</code></pre>
+<pre><code>Semantic relevance
+        +
+Structural relevance
+        +
+Explicit references
+        +
+Current task
+        +
+Conversation/agent state
+        +
+Token budget
+        ↓
+   Optimal context
+</code></pre>
+<hr>
+<h2>8. Single-Shot vs Tool-Calling</h2>
+<p><strong>Single-shot</strong> — for simple evaluation tasks. Simple, fast, easy to debug, one model request, works with models that don't support tools.</p>
+<pre><code>document-eval.py → evidence → local model → finding
+</code></pre>
+<p><strong>Tool-calling</strong> — for investigation and verification. Adaptive, capable of finding missing evidence, capable of challenging its own conclusions, better suited to large document collections. This is the preferred architecture for advanced verification.</p>
+<hr>
+<h2>9. The Information Spiral</h2>
+<pre><code>Question → Initial context → Reason → Identify information gap
+    → Retrieve additional context → Reason again
+    → Identify new relationship / contradiction → Retrieve again
+    → Reason → Verify → Final answer
+</code></pre>
+<p>Each reasoning cycle can improve the next context selection. The system becomes increasingly capable of navigating large information spaces without requiring the entire space to fit inside the model's context.</p>
+<h2>9a. The Validation Spiral (what keeps the information spiral honest)</h2>
+<p>The information spiral answers &quot;what does the model know, and what does it need next.&quot; It says nothing about whether what the model <em>concluded</em> is trustworthy. A second, narrower spiral runs alongside it at the claim level:</p>
+<pre><code>Model proposes a claim
+        ↓
+Deterministic check: does the cited evidence exist verbatim?
+        ↓
+Deterministic check: is the computation/operation valid?
+        ↓
+    ┌───┴───┐
+  VALID  INVALID → NEEDS_REVIEW, claim not accepted
+    │
+    ▼
+Claim accepted into FactHistory
+        ↓
+(unresolved) Is the *interpretation* correct — is this quote
+actually relevant to this fact? — still a semantic judgment
+        ↓
+Periodically checked against a small hand-labeled eval set,
+not left as an assumption
+</code></pre>
+<p>Two consequences follow directly from this, and both are committed roadmap items rather than aspirations:</p>
+<ol>
+<li><strong>Every agent that proposes structured claims (Reader, Auditor, Verifier) is built on the &quot;model proposes → Python validates → state updates&quot; pattern from Section 6a</strong>, not just The_Reader. Grounding checks (does the evidence exist, is the math right) are deterministic and mandatory before any claim enters the domain model.</li>
+<li><strong>A small labeled evaluation set is a required deliverable, not an afterthought.</strong> Before The_Auditor is built on top of The_Reader's output (Phase 7), a hand-annotated set of chunks with known-correct <code>FactHistory</code> results is used to measure where <code>check_answer_support()</code> and <code>check_revision_relevance()</code> agree or disagree with ground truth. This is cheap relative to building the next layer on an unvalidated one, and it is the only honest way to know whether the semantic layer can be trusted before more agents depend on it. See Phase 4a in the roadmap.</li>
+</ol>
+<hr>
+<h2>10. Local-Model Strategy</h2>
+<pre><code>Ollama → Qwen → ModelBackend → Orchestrator
+</code></pre>
+<p>The backend abstraction stays model-independent. Potential future backends: Ollama/Qwen, Ollama/other local models, Claude, OpenAI, other APIs. The orchestrator should not care which model is being used — this allows experimentation with local models while retaining the ability to use stronger cloud models for comparison or specialized tasks. Given that most of the system's semantic judgments run on a local model, Phase 1 should include an early, explicit check of whether Qwen can reliably execute a multi-step tool-calling loop at all, rather than assuming it and discovering otherwise mid-Phase-6.</p>
+<hr>
+<h2>11. Platform Goal</h2>
+<p>The system is designed to run naturally on Windows. WSL may remain an optional development environment but is not an architectural requirement.</p>
+<pre><code>Windows → Python → Ollama → Local model → Orchestrator → Document tools
+</code></pre>
+<hr>
+<h2>12. Design Principles</h2>
+<ul>
+<li><strong>Model independence</strong> — the orchestration system does not depend on a particular LLM vendor.</li>
+<li><strong>Tool independence</strong> — agents interact with capabilities through stable tool interfaces rather than manipulating databases directly.</li>
+<li><strong>Context efficiency</strong> — never place large amounts of information into context merely because it is available.</li>
+<li><strong>Progressive disclosure</strong> — give the model the minimum useful information first and let it request more.</li>
+<li><strong>Model proposes, Python validates</strong> — any claim an agent produces about a fact, a revision, or a computed value passes through deterministic validation before it is accepted into the domain model. This applies to every agent that emits structured claims, not only The_Reader.</li>
+<li><strong>Grounding vs. interpretation are different guarantees</strong> — the system distinguishes what it can <em>prove</em> (the cited text exists, the math is correct) from what it can only <em>judge</em> (the text means what the model says it means), and tracks confidence accordingly rather than treating both as equally certain.</li>
+<li><strong>Separation of concerns</strong> — Model, Orchestration, Tools, Context, Domain Model, and Data remain distinct layers.</li>
+<li><strong>Auditable reasoning</strong> — important conclusions are traceable back to evidence and source documents, including which claim in a FactHistory produced them.</li>
+<li><strong>Local-first</strong> — the architecture works with local models and local data without requiring a cloud API.</li>
+<li><strong>Replaceability</strong> — any individual model, retrieval system, agent, or tool can be replaced without redesigning the entire system.</li>
+</ul>
+<hr>
+<h2>13. Final Architecture</h2>
+<pre><code>                              USER
+                               │
+                               ▼
+                         ORCHESTRATOR
+                               │
+                ┌──────────────┼──────────────┐
+                ▼               ▼               ▼
+           The_Reader      The_Auditor      The_Drafter
+                │               │               │
+                └──────────────┼──────────────┘
+                               │
+                        CONTEXT ENGINE
+                               │
+                ┌──────────────┼──────────────┐
+                ▼               ▼               ▼
+             Search        Structure         Expand
+                │               │               │
+                └──────────────┼──────────────┘
+                               │
+                         DOMAIN MODEL
+                               │
+                ┌──────────────┼──────────────┐
+                ▼               ▼               ▼
+             Claims         Evidence         Findings
+                               │
+                               ▼
+                        DOCUMENT STORE
+                        SQLite / Chroma
+                               │
+                               ▼
+                           DOCUMENTS
+
+                               ▲
+                               │
+                         MODEL BACKEND
+                               │
+                     ┌─────────┴─────────┐
+                     ▼                   ▼
+               Ollama/Qwen           Other LLM
+</code></pre>
+<p>Each claim flowing through the Domain Model carries its own <code>FactHistory</code> — grounded claims, revision events, and the deterministic computations that produced the current value — so any Finding in the final report can be traced back to the evidence and the validation steps that produced it, not just the model's final sentence.</p>
+<hr>
+<h2>14. Cordis — Where It Fits, Held in Reserve</h2>
+<p>Cordis reframes the middle of the architecture from hard-coded modules to mountable/unmountable components with declared <code>provides</code> / <code>requires</code> and reversible effects:</p>
+<pre><code>ORCHESTRATOR
+     │
+     ▼
+RUNTIME CONTEXT
+     │
+┌────┴────┬─────────┐
+▼          ▼          ▼
+Model    Tools     Context Engine
+Provider Provider  Provider
+</code></pre>
+<p>Two ideas are worth keeping in mind even before this is built:</p>
+<p><strong>Temporal composability</strong> — a component's effects on the runtime (registered tools, event handlers, state) have a tracked inverse, so unmounting it cleanly undoes what it did, instead of requiring hand-maintained cleanup code.</p>
+<p><strong>Spatial composability</strong> — components declare dependencies and activate/deactivate automatically as those dependencies become available or unavailable (e.g. <code>The_Auditor</code> only becomes active once <code>AuditStore</code> is mounted).</p>
+<p>This becomes genuinely useful once there are multiple variants of an agent (<code>Reader</code>, <code>Reader+OCR</code>, <code>Reader+Legal</code>) and the system needs to compose a profile (<code>legal_document_analysis</code> vs. <code>research_papers</code>) from a shared pool of components rather than hard-coding one fixed pipeline.</p>
+<p><strong>This is explicitly not a near-term build target.</strong> Cordis's own API is unstable, and the base system — orchestrator, document tools, domain model, context engine — needs to exist and work before a composability layer has anything real to compose. The pattern (provides / requires / effects / lifecycle) is worth designing toward from Phase 5 onward; the full runtime is adopted only if and when plugin-lifecycle pain actually shows up in practice, not on a schedule.</p>
+<hr>
+<h2>15. Development Roadmap</h2>
+<p><strong>Phase 1 — Preserve the existing Orchestra.</strong> Establish a clean baseline: ModelBackend, tool registration/execution, orchestrator loop, Ollama backend, model switching. Include an early sanity check that Qwen can execute a multi-step tool-calling loop reliably — this assumption underlies everything downstream. <em>Deliverable: a reliable generic local agent, with a known answer on local-model tool-calling capability.</em></p>
+<p><strong>Phase 2 — Integrate document search.</strong> Bring <code>search_document(query)</code> from the Sixfeetup project into the Orchestra's tool system. <em>Deliverable: <code>Qwen → search_document() → SQLite/Chroma → results → Qwen</code>.</em></p>
+<p><strong>Phase 3 — Add evidence/audit tools.</strong> <code>retrieve_evidence()</code>, <code>audit_document()</code>, <code>get_audit_history()</code>. <em>Deliverable: a local document-verification agent.</em></p>
+<p><strong>Phase 4 — Establish the domain model.</strong> Formalize Document, Chunk, Claim, Evidence, Finding, AuditRecord, and — per Section 6a — the FactRecord/Claim/RevisionEvent types specific to The_Reader. <em>Deliverable: a coherent information model shared by all agents.</em></p>
+<p><strong>Phase 4a — Build the labeled evaluation set. (new)</strong> Before The_Reader's semantic judgments (<code>check_answer_support</code>, <code>check_revision_relevance</code>) are trusted by any downstream agent, hand-annotate a small set of chunks with known-correct FactHistory outcomes and measure agreement. This is a hard prerequisite for Phase 7, not optional polish. <em>Deliverable: a baseline accuracy measurement for the semantic layer, and a repeatable eval script.</em></p>
+<p><strong>Phase 5 — Build the Context Engine.</strong> Start simple (query → search → rank → select), then progressively add references, relationships, structural information, context expansion, token budgeting. <em>Deliverable: dynamic context selection.</em></p>
+<p><strong>Phase 5a — Composable capability pattern (reserve, not committed).</strong> Introduce <code>provides</code>/<code>requires</code> declarations and basic mount/unmount for agents and tools, in the spirit of Cordis, only if the number of agent variants has made ad-hoc wiring genuinely painful by this point. <em>Deliverable, if triggered: a minimal composable runtime; otherwise: explicitly deferred with a written reason.</em></p>
+<p><strong>Phase 6 — Implement The_Reader.</strong> Give it search, retrieve, context expansion, and the FactHistory domain model from Section 6a. Unify the standalone test pipeline and the production pipeline so they exercise the same code path. <em>Deliverable: adaptive document reading with an auditable claim history.</em></p>
+<p><strong>Phase 7 — Implement The_Auditor / Verifier.</strong> Cross-chunk resolution of which claims supersede which, built on top of a Reader whose semantic accuracy is already known from Phase 4a. <em>Deliverable: an agent capable of actively challenging findings, with a measured (not assumed) confidence level in its inputs.</em></p>
+<p><strong>Phase 8 — Add The_Chunker and advanced document ingestion.</strong> Generalize beyond the reference project's formats: PDF, DOCX, XLSX, TXT, HTML → common document representation. <em>Deliverable: broad document compatibility.</em></p>
+<p><strong>Phase 9 — Replace demo data with user-controlled corpora.</strong> The bundled Sixfeetup RFP data becomes a test fixture only; users provide their own corpus via <code>./documents/</code> or a configured source. <em>Deliverable: a general-purpose local document intelligence system.</em></p>
+<hr>
+<h2>16. The Core Thesis</h2>
+<p>The project is not simply &quot;run Claude's document workflow locally.&quot; It is:</p>
+<blockquote>
+<p>Build a model-independent agentic architecture that combines adaptive context management with specialized document intelligence, allowing a local model to progressively discover, retrieve, verify, and reason over information far larger than its raw context window — while keeping an explicit, auditable line between what the system has proven and what it has judged.</p>
+</blockquote>
+<p>The four source projects contribute different pieces:</p>
+<pre><code>LewNekos_AI_Orchestra  → HOW THE AGENT OPERATES
+Sixfeetup OrchestrateAgenticAI → WHAT THE AGENT CAN DO WITH DOCUMENTS
+Aider                   → HOW THE AGENT DECIDES WHAT CONTEXT IT NEEDS
+Cordis                  → HOW THE SYSTEM COMPOSES CAPABILITIES AT RUNTIME (reserve)
+</code></pre>
+<p>And The_Reader's fact-history design (Section 6a) contributes a fifth piece that cuts across all of them: <strong>HOW THE SYSTEM KNOWS THE DIFFERENCE BETWEEN WHAT IT FOUND AND WHAT IT CONCLUDED.</strong></p>
+<pre><code>              ┌─────────────────────┐
+              │     LOCAL MODEL      │
+              └──────────┬──────────┘
+                         │
+                    ORCHESTRATOR
+                         │
+              ┌──────────┴──────────┐
+              ▼                     ▼
+      CONTEXT ENGINE          DOMAIN TOOLS
+              │                     │
+              └──────────┬──────────┘
+                         ▼
+                   DOMAIN MODEL
+              (claims validated before
+               they become facts)
+                         │
+                         ▼
+                     DOCUMENTS
+</code></pre>
+<p>Whenever the project is tempted to add a new agent or Python file, the discipline is to ask: which architectural layer does it belong to, what capability does it add, and — following Section 9a — what in it is a deterministic guarantee versus a semantic judgment that needs to be measured against ground truth before something else depends on it.</p>

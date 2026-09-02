@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 # This is necessary because we need to modify 
 # sys.path before importing. other backends.py import breaks stuff
 from .verify_pipeline import ( # noqa: E402
+    build_fact_history,
     parse_entries,
     run_entry_loop,
     verified_categorizer,
@@ -35,15 +36,6 @@ CHECKLIST = [
     "Does this chunk name the company being invoiced?",
     "What's the amount due?",
 ]
-
-# This routing belongs to the checklist definition, not to the model's answer.
-# A wrong YES/NO from the model must not decide which verifier handles it.
-FACT_TYPES = {
-    "Does this chunk state a specific due date for payment?": "existence",
-    "Does this chunk mention a late fee or penalty amount?": "existence",
-    "Does this chunk name the company being invoiced?": "name",
-    "What's the amount due?": "numeric",
-}
 CHECK_PROMPT="""
 You are verifying facts against a source text chunk. For each checklist item, respond in this exact format:
 ITEM: <checklist item>
@@ -73,28 +65,58 @@ def chat_fn(prompt):
     reply = backend.chat([{"role": "user", "content": prompt}])
     return reply["content"]
 
-def print_final_report(records):
-    """Every record here is terminal - nothing gets silently dropped anymore."""
-    for r in records:
+def print_final_report(results):
+    """Print each ReaderResult as the claim/evidence/revision tree, not a
+    flat answer field - so the chain that produced current_value is visible."""
+    for r in results:
         print(f"""
-        item: {r['item']}
-        final_status: {r['final_status']}
-        final_answer: {r['final_answer']}
-        quote: {r.get('quote')}
-        (initial_answer was: {r['initial_answer']})""")
-        if r.get("revision_quote"):
-            print(f"        revision_quote: {r['revision_quote']}")
-            print(f"        operation: {r.get('operation')}  delta: {r.get('delta')}")
-        if r.get("reason"):
-            print(f"        reason: {r['reason']}")
+Fact
+|
++-- Question
+|     {r.question}  ({r.fact_type})
+|
++-- Initial claim
+|     Value: {r.initial_claim.value}
+|     Evidence: "{r.initial_claim.evidence.quote}\"""")
+        if r.evidence_repair is not None:
+            print(f"""|
++-- Evidence repair
+|     New evidence: "{r.evidence_repair.quote}\"""")
+        if r.support_judgment is not None:
+            print(f"""|
++-- Support judgment
+|     {r.support_judgment.verdict}""")
+        if r.corrected_claim is not None:
+            print(f"""|
++-- Corrected claim
+|     Value: {r.corrected_claim.value}
+|     Evidence: "{r.corrected_claim.evidence.quote}\"""")
+        if r.revision is not None:
+            print(f"""|
++-- Revision
+|     {r.revision.operation} {r.revision.amount}
+|     Evidence: "{r.revision.evidence.quote}\"""")
+        print(f"""|
++-- Status: {r.status}""")
+        if r.reason:
+            print(f"|     reason: {r.reason}")
+        print(f"""|
+`-- Current value
+      {r.current_value}
+""")
         print("----------------")
 
 #Check the response
 def main():
     ENTRIES = parse_entries(run_checklist(CHUNK, CHECKLIST))  # pure response list
-    REPORT = verified_categorizer(verify(ENTRIES, CHUNK), FACT_TYPES)
-    FINAL = run_entry_loop(REPORT, CHUNK, chat_fn)             # closes the loop: repair -> support check -> revision check
-    print_final_report(FINAL)
+    REPORT = verified_categorizer(verify(ENTRIES, CHUNK))     # response list, quote-verified + categorized
+    RESULTS = run_entry_loop(REPORT, CHUNK, chat_fn)           # closes the loop: repair -> support check -> revision check
+    print_final_report(RESULTS)
+
+    # FactHistory is the durable, cross-run record - built here per-question
+    # from this single pass for now (see build_fact_history's docstring).
+    HISTORIES = [build_fact_history(r) for r in RESULTS]
+    return RESULTS, HISTORIES
 
 if __name__ == "__main__":
     main()

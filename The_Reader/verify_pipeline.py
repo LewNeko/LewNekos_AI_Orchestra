@@ -8,6 +8,27 @@ from py_compile import(
 ) 
 import re
 
+try:
+    from .models import (
+        ComputedValue,
+        Evidence,
+        FactClaim,
+        ReaderResult,
+        RevisionEvent,
+        SupportJudgment,
+    )
+except ImportError:
+    # Falls back to a plain import so this file still runs standalone
+    # (e.g. `python verify_pipeline.py`) as well as inside the package.
+    from models import (
+        ComputedValue,
+        Evidence,
+        FactClaim,
+        ReaderResult,
+        RevisionEvent,
+        SupportJudgment,
+    )
+
 CHUNK = """The invoice was issued on March 3rd, 2024, to Acme
 "Corp. Payment terms are net-30. The total amount due is 
 "$4,250.00. No late fee schedule is mentioned in this section. 
@@ -103,7 +124,7 @@ ITEM: {item}
 ANSWER: {answer}
 QUOTE: {quote}
 Status: {status}
-FACT_TYPE: {fact_type}
+category: {category}
 
 Does any OTHER sentence in the chunk revise this SPECIFIC fact (not some other fact in the chunk)?
 Does the revision quote refer to the same entity/subject as the original quote?
@@ -118,19 +139,6 @@ REVISION_QUOTE: <exact sentence that revises it, or NOT FOUND>
 ORIGINAL_VALUE: <the original number in the QUOTE, digits only>
 DELTA_DIRECTION: INCREASE, DECREASE, DIVIDED, MULTIPLIED, or NONE
 DELTA_VALUE: <the change amount, digits only>
-"""
-
-REVISION_RELEVANCE_PROMPT = """Decide whether a candidate revision changes
-the SAME numeric fact as the original fact. Answer NO when it changes a
-different subject, even if both statements contain numbers.
-
-QUESTION: {item}
-ORIGINAL ANSWER: {answer}
-ORIGINAL QUOTE: {quote}
-CANDIDATE REVISION: {revision_quote}
-
-Respond in exactly this format:
-RELEVANT: YES or NO
 """
 
 def is_self_referential(entry, fields):
@@ -204,13 +212,6 @@ def normalize(text):
     """Collapse whitespace so trivial formatting diffs don't cause false FAILs."""
     return re.sub(r'\s+', ' ', text.strip())
 
-
-def canonical_item(item):
-    """Normalize model-copied checklist text before FACT_TYPE lookup."""
-    if not item:
-        return ""
-    return re.sub(r"[^a-z0-9]+", " ", normalize(item).casefold()).strip()
-
 def verify(entries, chunk):
     """Check each entry against the source chunk and assign a status."""
     report = []
@@ -226,17 +227,36 @@ def verify(entries, chunk):
         report.append({**e, "status": status})
     return report
 
-def verified_categorizer(entries, fact_types=None):
-    """Attach a fact type defined by the checklist, never by model output."""
-    normalized_fact_types = {
-        canonical_item(item): fact_type
-        for item, fact_type in (fact_types or {}).items()
-    }
+def verified_categorizer(entries):
+    #report(first pass) = [{'item': 'Does this chunk state a specific due date for payment?', 'answer': 'YES', 'quote': 'The invoice was issued on March 3rd, 2024', 'status': 'VERIFIED', 'category': 'DETERMINISTIC'}]
     report = []
     for e in entries:
-        fact_type = normalized_fact_types.get(canonical_item(e["item"]), "unknown")
-        report.append({**e, "fact_type": fact_type})
+        answer_type = "UNCATEGORIZED"
+        if e['status'] == "VERIFIED" and e['answer'] in ("YES", "NO"):
+            answer_type = "DETERMINISTIC"
+        report.append({**e,"category":answer_type})
     return report
+
+def build_fact_history(result):
+    """Turn ONE ReaderResult into a FactHistory. Deliberately thin for now -
+    a real builder would merge ReaderResults across multiple runs/chunks for
+    the same question, appending new claims/revisions onto an existing
+    FactHistory instead of creating one from scratch each time."""
+    try:
+        from .models import FactHistory
+    except ImportError:
+        from models import FactHistory
+
+    claims = [result.initial_claim]
+    if result.corrected_claim is not None:
+        claims.append(result.corrected_claim)
+    revisions = [result.revision] if result.revision is not None else []
+    return FactHistory(
+        question=result.question,
+        fact_type=result.fact_type,
+        claims=claims,
+        revisions=revisions,
+    )
 
 def mock_chat(prompt):
     """Simulates what gemma3:4b *should* say if it reasons over the whole chunk."""
@@ -245,37 +265,9 @@ def mock_chat(prompt):
 def check_for_revision(chunk, entry, chat_fn):
     """checks the model's initial output for revision"""
     prompt = REVISION_EXTRACT_PROMPT.format(
-        chunk=chunk, fact_type=entry["fact_type"], item=entry["item"], answer=entry["answer"], quote=entry["quote"], status=entry["status"]
+        chunk=chunk, category=entry['category'], item=entry['item'], answer=entry['answer'], quote=entry['quote'], status=entry['status']
     )
     return chat_fn(prompt)
-
-
-def check_revision_relevance(entry, revision_quote, chat_fn):
-    """Ask whether a candidate revision modifies this entry's numeric fact."""
-    prompt = REVISION_RELEVANCE_PROMPT.format(
-        item=entry["item"],
-        answer=entry["answer"],
-        quote=entry["quote"],
-        revision_quote=revision_quote,
-    )
-    return parse_fields(chat_fn(prompt)).get("RELEVANT", "").strip().upper()
-
-
-def original_value_matches_entry(entry, original_value):
-    """Require revision arithmetic to start from this entry's own evidence."""
-    try:
-        expected = float(original_value.replace("$", "").replace(",", ""))
-    except (AttributeError, ValueError):
-        return False
-
-    values = re.findall(r"\$?\d[\d,]*(?:\.\d+)?", f"{entry['answer']} {entry['quote']}")
-    for value in values:
-        try:
-            if float(value.replace("$", "").replace(",", "")) == expected:
-                return True
-        except ValueError:
-            continue
-    return False
 
 def repair_quote(chunk, entry, chat_fn):
     """Narrow retry for UNVERIFIED_QUOTE: keep the answer, only ask for a
@@ -305,113 +297,148 @@ def format_amount(value):
     except (TypeError, ValueError):
         return str(value)
 
+def classify_fact_type(value):
+    """Guess whether a claimed value is boolean, numeric, or free text.
+    Used only to label the ReaderResult - it never affects verification."""
+    v = (value or "").strip().upper()
+    if v in ("YES", "NO"):
+        return "boolean"
+    cleaned = v.replace("$", "").replace(",", "").strip()
+    try:
+        float(cleaned)
+        return "numeric"
+    except ValueError:
+        return "text"
+
 def process_entry(chunk, entry, chat_fn):
-    """Run ONE checklist entry through the full loop until it reaches a
-    terminal status. This is the piece that used to just print a warning
-    and move on - now every entry ends in exactly one of:
-        VERIFIED_NO_CHANGE, VERIFIED_REPAIRED_QUOTE, VERIFIED_CORRECTED,
-        VERIFIED_REVISED, NEEDS_REVIEW
+    """Run ONE checklist entry through the full loop and return a
+    ReaderResult - the entire chain (initial claim, any quote repair, any
+    support judgment/correction, any revision), not just a final value.
+
+    This function does NOT decide what the long-term fact history looks
+    like - it just reports what happened on this one pass. Building
+    FactHistory out of one or more ReaderResults is a separate step.
     """
-    record = {
-        "item": entry["item"],
-        "initial_answer": entry["answer"],
-        "initial_quote": entry["quote"],
-        "fact_type": entry.get("fact_type", "unknown"),
-    }
-    current = dict(entry)  # working copy we're allowed to mutate
+    question = entry["item"]
+    fact_type = classify_fact_type(entry["answer"])
+    initial_claim = FactClaim(value=entry["answer"], evidence=Evidence(entry["quote"]))
 
-    def terminal(status, answer=None, quote=None, **extra):
-        record["final_status"] = status
-        record["final_answer"] = answer if answer is not None else current["answer"]
-        record["quote"] = quote if quote is not None else current["quote"]
-        record.update(extra)
-        return record
+    if entry["status"] == "MISSING_FIELDS":
+        return ReaderResult(
+            question=question, fact_type=fact_type, initial_claim=initial_claim,
+            status="NEEDS_REVIEW",
+            reason="One or more of item/answer/quote were missing from the model output.",
+        )
 
-    if current["status"] == "MISSING_FIELDS":
-        return terminal("NEEDS_REVIEW",
-                         reason="One or more of item/answer/quote were missing from the model output.")
+    working_claim = initial_claim
+    quote_status = entry["status"]
+    evidence_repair = None
 
     # Step 1: repair a bad quote BEFORE trusting anything else about this entry.
-    quote_was_repaired = False
-    if current["status"] == "UNVERIFIED_QUOTE":
-        repaired = repair_quote(chunk, current, chat_fn)
+    if quote_status == "UNVERIFIED_QUOTE":
+        repaired = repair_quote(chunk, entry, chat_fn)
         candidate = (repaired.get("quote") or "").strip()
         if candidate and candidate.upper() != "NOT FOUND" and normalize(candidate) in normalize(chunk):
-            current["quote"] = candidate
-            current["status"] = "VERIFIED"
-            quote_was_repaired = True
+            evidence_repair = Evidence(candidate)
+            # the answer is unchanged by design (repair_quote can't touch it) -
+            # only the evidence backing it changes.
+            working_claim = FactClaim(value=working_claim.value, evidence=evidence_repair)
+            quote_status = "VERIFIED"
         else:
-            return terminal("NEEDS_REVIEW",
-                             reason="Quote could not be verified even after a repair attempt.")
+            return ReaderResult(
+                question=question, fact_type=fact_type, initial_claim=initial_claim,
+                status="NEEDS_REVIEW",
+                reason="Quote could not be verified even after a repair attempt.",
+            )
 
     # OK_NOT_FOUND ("the model correctly said no evidence exists") is already terminal.
-    if current["status"] == "OK_NOT_FOUND":
-        return terminal("VERIFIED_NO_CHANGE")
+    if quote_status == "OK_NOT_FOUND":
+        return ReaderResult(
+            question=question, fact_type=fact_type, initial_claim=initial_claim,
+            status="VERIFIED_NO_CHANGE",
+        )
 
-    # Step 2: the quote text exists verbatim - but does it actually support
-    # THIS question and THIS answer, or just the general topic?
-    support = check_answer_support(chunk, current, chat_fn)
-    supported_answer = (support.get("answer") or "").strip()
+    # Step 2: the quote exists verbatim - but does it actually support THIS
+    # question and THIS value, or just the general topic?
+    support = check_answer_support(
+        chunk, {"item": question, "answer": working_claim.value, "quote": working_claim.evidence.quote}, chat_fn
+    )
+    supported_value = (support.get("answer") or "").strip()
     supported_quote = (support.get("quote") or "").strip()
 
-    if supported_answer and supported_answer.upper() != current["answer"].strip().upper():
-        # The model is walking back its own answer.
+    support_judgment = None
+    corrected_claim = None
+
+    if supported_value and supported_value.upper() != working_claim.value.strip().upper():
+        support_judgment = SupportJudgment(verdict="UNSUPPORTED", checked_claim=working_claim)
         if not supported_quote or supported_quote.upper() == "NOT FOUND" \
                 or normalize(supported_quote) not in normalize(chunk):
-            # Corrected to "no support in the text" - that's a clean, terminal result.
-            return terminal("VERIFIED_CORRECTED",
-                             answer=supported_answer, quote="NOT FOUND",
-                             reason="Original quote did not support the original answer; answer corrected.")
+            # Corrected to "no support in the text" - clean, terminal result.
+            corrected_claim = FactClaim(value=supported_value, evidence=Evidence("NOT FOUND"))
+            return ReaderResult(
+                question=question, fact_type=fact_type, initial_claim=initial_claim,
+                evidence_repair=evidence_repair, support_judgment=support_judgment,
+                corrected_claim=corrected_claim, status="VERIFIED_NO_CHANGE",
+                reason="Original evidence did not support the original claim; claim corrected.",
+            )
         else:
-            # Corrected AND backed by a new exact quote - keep going with the corrected fact.
-            current["answer"] = supported_answer
-            current["quote"] = supported_quote
+            # Corrected AND backed by a new exact quote - keep going with the corrected claim.
+            corrected_claim = FactClaim(value=supported_value, evidence=Evidence(supported_quote))
+            working_claim = corrected_claim
+    else:
+        support_judgment = SupportJudgment(verdict="SUPPORTED", checked_claim=working_claim)
 
-    # Only numeric facts currently have a revision handler. Existence, date,
-    # and name facts still reach a terminal result after quote/support checks.
-    if current.get("fact_type") != "numeric":
-        status = "VERIFIED_REPAIRED_QUOTE" if quote_was_repaired else "VERIFIED_NO_CHANGE"
-        return terminal(status)
-
-    # Step 3: does some OTHER, later statement revise this numeric fact?
-    revision_text = check_for_revision(chunk, current, chat_fn)
+    # Step 3: does some OTHER, later statement revise this (now-supported) claim?
+    revision_entry = {
+        "item": question, "answer": working_claim.value, "quote": working_claim.evidence.quote,
+        "status": "VERIFIED", "category": entry.get("category"),
+    }
+    revision_text = check_for_revision(chunk, revision_entry, chat_fn)
     revision_fields = parse_fields(revision_text)
-
-    if revision_fields.get("REVISED") != "YES":
-        status = "VERIFIED_REPAIRED_QUOTE" if quote_was_repaired else "VERIFIED_NO_CHANGE"
-        return terminal(status)
-
-    revision_quote = revision_fields.get("REVISION_QUOTE", "")
-    if normalize(revision_quote) not in normalize(chunk):
-        return terminal("NEEDS_REVIEW", reason="Revision quote could not be verified against the source.")
-
-    if not original_value_matches_entry(current, revision_fields.get("ORIGINAL_VALUE")):
-        return terminal("NEEDS_REVIEW", reason="Revision original value did not match this entry's evidence.")
-
-    relevance = check_revision_relevance(current, revision_quote, chat_fn)
-    if relevance == "NO":
-        return terminal("VERIFIED_NO_CHANGE", reason="Candidate revision concerns a different fact.")
-    if relevance != "YES":
-        return terminal("NEEDS_REVIEW", reason="Could not determine whether the revision applies to this fact.")
-
-    computed = compute_corrected_value(revision_text, current)
+    computed = compute_corrected_value(revision_text, revision_entry)
 
     if computed == "PARSE_ERROR":
-        return terminal("NEEDS_REVIEW", reason="Could not parse the revision-check response.")
+        return ReaderResult(
+            question=question, fact_type=fact_type, initial_claim=initial_claim,
+            evidence_repair=evidence_repair, support_judgment=support_judgment,
+            corrected_claim=corrected_claim, status="NEEDS_REVIEW",
+            reason="Could not parse the revision-check response.",
+        )
 
-    if computed is not None:
-        final_answer = format_amount(computed) if isinstance(computed, float) else computed
-        return terminal("VERIFIED_REVISED",
-                         answer=final_answer,
-                         revision_quote=revision_quote,
-                         operation=revision_fields.get("DELTA_DIRECTION"),
-                         delta=revision_fields.get("DELTA_VALUE"))
+    if computed is not None and revision_fields.get("REVISED") == "YES":
+        revision_quote = revision_fields.get("REVISION_QUOTE", "")
+        if normalize(revision_quote) in normalize(chunk):
+            final_value = format_amount(computed) if isinstance(computed, float) else str(computed)
+            revision = RevisionEvent(
+                evidence=Evidence(revision_quote),
+                operation=revision_fields.get("DELTA_DIRECTION", "NONE"),
+                amount=revision_fields.get("DELTA_VALUE", "0"),
+                computed_value=ComputedValue(final_value),
+            )
+            return ReaderResult(
+                question=question, fact_type=fact_type, initial_claim=initial_claim,
+                evidence_repair=evidence_repair, support_judgment=support_judgment,
+                corrected_claim=corrected_claim, revision=revision, status="VERIFIED_REVISED",
+            )
+        else:
+            return ReaderResult(
+                question=question, fact_type=fact_type, initial_claim=initial_claim,
+                evidence_repair=evidence_repair, support_judgment=support_judgment,
+                corrected_claim=corrected_claim, status="NEEDS_REVIEW",
+                reason="Revision quote could not be verified against the source.",
+            )
 
-    return terminal("NEEDS_REVIEW", reason="Revision was claimed but no valid arithmetic operation was supplied.")
+    # Nothing revised it - done.
+    status = "VERIFIED_REPAIRED_QUOTE" if evidence_repair is not None else "VERIFIED_NO_CHANGE"
+    return ReaderResult(
+        question=question, fact_type=fact_type, initial_claim=initial_claim,
+        evidence_repair=evidence_repair, support_judgment=support_judgment,
+        corrected_claim=corrected_claim, status=status,
+    )
 
 def run_entry_loop(report, chunk, chat_fn):
-    """Run every checklist entry through process_entry so nothing is left
-    hanging on a printed warning - each item comes back with a terminal status."""
+    """Run every checklist entry through process_entry. Returns a list of
+    ReaderResult objects - nothing is left hanging on a printed warning."""
     return [process_entry(chunk, entry, chat_fn) for entry in report]
 
 def main():
