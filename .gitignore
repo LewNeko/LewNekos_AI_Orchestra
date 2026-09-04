@@ -4,3 +4,4 @@ __pycache__/
 *.pyo
 *.pyd
 .cograph
+Documentation/MCP Client for ollama.md
