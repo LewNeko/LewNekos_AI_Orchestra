@@ -310,6 +310,30 @@ def classify_fact_type(value):
     except ValueError:
         return "text"
 
+def _judge_support(working_claim, raw_support, chunk):
+    """Translate check_answer_support()'s raw model-oriented dict into
+    domain objects. This is the ONE place the old "answer"/"quote" dict
+    vocabulary is allowed to leak in from the helper; process_entry never
+    reads raw_support directly.
+
+    Returns (SupportJudgment, corrected_claim_or_None). corrected_claim is
+    None when the evidence supported the existing claim - i.e. nothing new
+    to report, working_claim stands as-is.
+    """
+    proposed_value = (raw_support.get("answer") or "").strip()
+    proposed_quote = (raw_support.get("quote") or "").strip()
+
+    if not proposed_value or proposed_value.upper() == working_claim.value.strip().upper():
+        return SupportJudgment(verdict="SUPPORTED", checked_claim=working_claim), None
+
+    judgment = SupportJudgment(verdict="UNSUPPORTED", checked_claim=working_claim)
+    if not proposed_quote or proposed_quote.upper() == "NOT FOUND" \
+            or normalize(proposed_quote) not in normalize(chunk):
+        corrected = FactClaim(value=proposed_value, evidence=Evidence("NOT FOUND"))
+    else:
+        corrected = FactClaim(value=proposed_value, evidence=Evidence(proposed_quote))
+    return judgment, corrected
+
 def process_entry(chunk, entry, chat_fn):
     """Run ONE checklist entry through the full loop and return a
     ReaderResult - the entire chain (initial claim, any quote repair, any
@@ -359,34 +383,28 @@ def process_entry(chunk, entry, chat_fn):
         )
 
     # Step 2: the quote exists verbatim - but does it actually support THIS
-    # question and THIS value, or just the general topic?
-    support = check_answer_support(
+    # question and THIS value, or just the general topic? check_answer_support
+    # still speaks the raw "answer"/"quote" dict vocabulary (that's the model
+    # boundary) - _judge_support is the one place that gets translated into
+    # domain objects, so nothing past this point touches a dict again.
+    raw_support = check_answer_support(
         chunk, {"item": question, "answer": working_claim.value, "quote": working_claim.evidence.quote}, chat_fn
     )
-    supported_value = (support.get("answer") or "").strip()
-    supported_quote = (support.get("quote") or "").strip()
+    support_judgment, corrected_claim = _judge_support(working_claim, raw_support, chunk)
 
-    support_judgment = None
-    corrected_claim = None
-
-    if supported_value and supported_value.upper() != working_claim.value.strip().upper():
-        support_judgment = SupportJudgment(verdict="UNSUPPORTED", checked_claim=working_claim)
-        if not supported_quote or supported_quote.upper() == "NOT FOUND" \
-                or normalize(supported_quote) not in normalize(chunk):
-            # Corrected to "no support in the text" - clean, terminal result.
-            corrected_claim = FactClaim(value=supported_value, evidence=Evidence("NOT FOUND"))
+    if corrected_claim is not None:
+        working_claim = corrected_claim
+        if corrected_claim.evidence.quote == "NOT FOUND":
+            # The claim changed and has no exact evidence of its own - still
+            # terminal, but it's a correction, not "no change".
             return ReaderResult(
                 question=question, fact_type=fact_type, initial_claim=initial_claim,
                 evidence_repair=evidence_repair, support_judgment=support_judgment,
-                corrected_claim=corrected_claim, status="VERIFIED_NO_CHANGE",
+                corrected_claim=corrected_claim, status="VERIFIED_CORRECTED",
                 reason="Original evidence did not support the original claim; claim corrected.",
             )
-        else:
-            # Corrected AND backed by a new exact quote - keep going with the corrected claim.
-            corrected_claim = FactClaim(value=supported_value, evidence=Evidence(supported_quote))
-            working_claim = corrected_claim
-    else:
-        support_judgment = SupportJudgment(verdict="SUPPORTED", checked_claim=working_claim)
+        # else: corrected AND backed by a new exact quote - keep going below
+        # with the corrected claim so a revision can still be checked against it.
 
     # Step 3: does some OTHER, later statement revise this (now-supported) claim?
     revision_entry = {
@@ -451,5 +469,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    
