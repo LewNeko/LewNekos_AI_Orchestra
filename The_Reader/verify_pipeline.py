@@ -334,6 +334,51 @@ def _judge_support(working_claim, raw_support, chunk):
         corrected = FactClaim(value=proposed_value, evidence=Evidence(proposed_quote))
     return judgment, corrected
 
+def _validate_revision(working_claim, revision_fields, chunk):
+    """Phase A of Step 3: decide whether a candidate revision is real,
+    evidenced, relevant to working_claim, and internally consistent -
+    WITHOUT computing anything. compute_corrected_value() (Phase B) only
+    runs if this returns "VALID".
+
+    Note: there's no check_revision_relevance() in this codebase (checked
+    before writing this). The closest existing mechanism is
+    is_self_referential(), which catches the model citing the original
+    quote back at itself. There was previously no check that the revision's
+    stated ORIGINAL_VALUE actually matches working_claim's value, so that's
+    added here as the other half of "relevant to this fact."
+
+    Returns one of:
+        {"outcome": "NONE"}                          - model found no revision
+        {"outcome": "VALID", "revision_quote": ...}   - safe to compute
+        {"outcome": "IRRELEVANT", "reason": ...}      - real revision, wrong fact
+        {"outcome": "INVALID", "reason": ...}         - unverifiable/unusable
+    """
+    if revision_fields.get("REVISED") != "YES":
+        return {"outcome": "NONE"}
+
+    revision_quote = revision_fields.get("REVISION_QUOTE", "")
+    if not revision_quote or normalize(revision_quote) not in normalize(chunk):
+        return {"outcome": "INVALID", "reason": "Revision quote could not be verified against the source."}
+
+    # Relevance check #1 (the mechanism that already exists in this codebase):
+    # catches the model citing the original quote back at itself as its own "revision".
+    if is_self_referential({"quote": working_claim.evidence.quote}, revision_fields):
+        return {"outcome": "IRRELEVANT", "reason": "Candidate revision concerns a different fact (self-referential match)."}
+
+    # Relevance check #2 (new): does the revision's stated original value
+    # even match the value currently on working_claim? If not, the model
+    # found a real revision - just not to this fact.
+    try:
+        claim_value = float(working_claim.value.replace("$", "").replace(",", ""))
+        revision_original = float(revision_fields.get("ORIGINAL_VALUE", "").replace("$", "").replace(",", ""))
+    except (ValueError, AttributeError):
+        return {"outcome": "INVALID", "reason": "Could not parse the revision's original value for comparison."}
+
+    if abs(claim_value - revision_original) > 0.01:
+        return {"outcome": "IRRELEVANT", "reason": "Candidate revision concerns a different fact (original value doesn't match this claim)."}
+
+    return {"outcome": "VALID", "revision_quote": revision_quote}
+
 def process_entry(chunk, entry, chat_fn):
     """Run ONE checklist entry through the full loop and return a
     ReaderResult - the entire chain (initial claim, any quote repair, any
@@ -413,40 +458,52 @@ def process_entry(chunk, entry, chat_fn):
     }
     revision_text = check_for_revision(chunk, revision_entry, chat_fn)
     revision_fields = parse_fields(revision_text)
-    computed = compute_corrected_value(revision_text, revision_entry)
 
-    if computed == "PARSE_ERROR":
+    # Phase A: validate the candidate revision BEFORE any arithmetic runs.
+    validation = _validate_revision(working_claim, revision_fields, chunk)
+
+    if validation["outcome"] == "INVALID":
         return ReaderResult(
             question=question, fact_type=fact_type, initial_claim=initial_claim,
             evidence_repair=evidence_repair, support_judgment=support_judgment,
             corrected_claim=corrected_claim, status="NEEDS_REVIEW",
-            reason="Could not parse the revision-check response.",
+            reason=validation["reason"],
         )
 
-    if computed is not None and revision_fields.get("REVISED") == "YES":
-        revision_quote = revision_fields.get("REVISION_QUOTE", "")
-        if normalize(revision_quote) in normalize(chunk):
-            final_value = format_amount(computed) if isinstance(computed, float) else str(computed)
-            revision = RevisionEvent(
-                evidence=Evidence(revision_quote),
-                operation=revision_fields.get("DELTA_DIRECTION", "NONE"),
-                amount=revision_fields.get("DELTA_VALUE", "0"),
-                computed_value=ComputedValue(final_value),
-            )
-            return ReaderResult(
-                question=question, fact_type=fact_type, initial_claim=initial_claim,
-                evidence_repair=evidence_repair, support_judgment=support_judgment,
-                corrected_claim=corrected_claim, revision=revision, status="VERIFIED_REVISED",
-            )
-        else:
+    if validation["outcome"] == "IRRELEVANT":
+        return ReaderResult(
+            question=question, fact_type=fact_type, initial_claim=initial_claim,
+            evidence_repair=evidence_repair, support_judgment=support_judgment,
+            corrected_claim=corrected_claim, status="VERIFIED_NO_CHANGE",
+            reason=validation["reason"],
+        )
+
+    if validation["outcome"] == "VALID":
+        # Phase B: only now does Python compute anything.
+        computed = compute_corrected_value(revision_text, revision_entry)
+
+        if computed == "PARSE_ERROR" or computed is None:
             return ReaderResult(
                 question=question, fact_type=fact_type, initial_claim=initial_claim,
                 evidence_repair=evidence_repair, support_judgment=support_judgment,
                 corrected_claim=corrected_claim, status="NEEDS_REVIEW",
-                reason="Revision quote could not be verified against the source.",
+                reason="Revision passed validation but could not be computed.",
             )
 
-    # Nothing revised it - done.
+        final_value = format_amount(computed) if isinstance(computed, float) else str(computed)
+        revision = RevisionEvent(
+            evidence=Evidence(validation["revision_quote"]),
+            operation=revision_fields.get("DELTA_DIRECTION", "NONE"),
+            amount=revision_fields.get("DELTA_VALUE", "0"),
+            computed_value=ComputedValue(final_value),
+        )
+        return ReaderResult(
+            question=question, fact_type=fact_type, initial_claim=initial_claim,
+            evidence_repair=evidence_repair, support_judgment=support_judgment,
+            corrected_claim=corrected_claim, revision=revision, status="VERIFIED_REVISED",
+        )
+
+    # outcome == "NONE": nothing revised it - done.
     status = "VERIFIED_REPAIRED_QUOTE" if evidence_repair is not None else "VERIFIED_NO_CHANGE"
     return ReaderResult(
         question=question, fact_type=fact_type, initial_claim=initial_claim,
