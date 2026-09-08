@@ -318,7 +318,8 @@ def _judge_support(working_claim, raw_support, chunk):
 
     Returns (SupportJudgment, corrected_claim_or_None). corrected_claim is
     None when the evidence supported the existing claim - i.e. nothing new
-    to report, working_claim stands as-is.
+    to report, working_claim stands as-is - OR when the model proposed a
+    correction whose value isn't even the right type for this fact.
     """
     proposed_value = (raw_support.get("answer") or "").strip()
     proposed_quote = (raw_support.get("quote") or "").strip()
@@ -327,6 +328,14 @@ def _judge_support(working_claim, raw_support, chunk):
         return SupportJudgment(verdict="SUPPORTED", checked_claim=working_claim), None
 
     judgment = SupportJudgment(verdict="UNSUPPORTED", checked_claim=working_claim)
+
+    # A proposed correction that doesn't match the original fact's type
+    # (e.g. a numeric fact "corrected" to free text) is a model glitch,
+    # not a usable correction - reject it before it becomes a FactClaim.
+    fact_type = classify_fact_type(working_claim.value)
+    if not is_valid_value(proposed_value, fact_type):
+        return judgment, None
+
     if not proposed_quote or proposed_quote.upper() == "NOT FOUND" \
             or normalize(proposed_quote) not in normalize(chunk):
         corrected = FactClaim(value=proposed_value, evidence=Evidence("NOT FOUND"))
@@ -378,6 +387,18 @@ def _validate_revision(working_claim, revision_fields, chunk):
         return {"outcome": "IRRELEVANT", "reason": "Candidate revision concerns a different fact (original value doesn't match this claim)."}
 
     return {"outcome": "VALID", "revision_quote": revision_quote}
+
+def _terminal_status(corrected_claim, evidence_repair):
+    """Pick the right terminal status when nothing further (no numeric
+    revision) changes the claim. A corrected value takes priority over a
+    same-value quote repair, which takes priority over plain no-change -
+    they're not mutually exclusive (a claim can be both quote-repaired AND
+    later corrected), and the corrected_claim always wins."""
+    if corrected_claim is not None:
+        return "VERIFIED_CORRECTED"
+    if evidence_repair is not None:
+        return "VERIFIED_REPAIRED_QUOTE"
+    return "VERIFIED_NO_CHANGE"
 
 def process_entry(chunk, entry, chat_fn):
     """Run ONE checklist entry through the full loop and return a
@@ -451,7 +472,19 @@ def process_entry(chunk, entry, chat_fn):
         # else: corrected AND backed by a new exact quote - keep going below
         # with the corrected claim so a revision can still be checked against it.
 
-    # Step 3: does some OTHER, later statement revise this (now-supported) claim?
+        # Step 3: does some OTHER, later statement revise this (now-supported) claim?
+    # REVISION_EXTRACT_PROMPT + compute_corrected_value is an arithmetic
+    # mechanism (ORIGINAL_VALUE / DELTA_VALUE / DELTA_DIRECTION) - it only
+    # makes sense for numeric facts. Running it on a boolean/text fact means
+    # asking the model to invent numbers that don't exist, so skip it.
+    if fact_type != "numeric":
+        return ReaderResult(
+            question=question, fact_type=fact_type, initial_claim=initial_claim,
+            evidence_repair=evidence_repair, support_judgment=support_judgment,
+            corrected_claim=corrected_claim,
+            status=_terminal_status(corrected_claim, evidence_repair),
+        )
+
     revision_entry = {
         "item": question, "answer": working_claim.value, "quote": working_claim.evidence.quote,
         "status": "VERIFIED", "category": entry.get("category"),
@@ -474,7 +507,8 @@ def process_entry(chunk, entry, chat_fn):
         return ReaderResult(
             question=question, fact_type=fact_type, initial_claim=initial_claim,
             evidence_repair=evidence_repair, support_judgment=support_judgment,
-            corrected_claim=corrected_claim, status="VERIFIED_NO_CHANGE",
+            corrected_claim=corrected_claim,
+            status=_terminal_status(corrected_claim, evidence_repair),
             reason=validation["reason"],
         )
 
@@ -504,12 +538,33 @@ def process_entry(chunk, entry, chat_fn):
         )
 
     # outcome == "NONE": nothing revised it - done.
-    status = "VERIFIED_REPAIRED_QUOTE" if evidence_repair is not None else "VERIFIED_NO_CHANGE"
     return ReaderResult(
         question=question, fact_type=fact_type, initial_claim=initial_claim,
         evidence_repair=evidence_repair, support_judgment=support_judgment,
-        corrected_claim=corrected_claim, status=status,
+        corrected_claim=corrected_claim,
+        status=_terminal_status(corrected_claim, evidence_repair),
     )
+
+def is_valid_value(value, fact_type):
+    """Check whether `value` is even the right *kind* of thing for
+    `fact_type` ("boolean", "numeric", or "text"). Used to catch a model
+    proposing a correction that doesn't match the fact's type at all -
+    e.g. "corrected" a numeric fact to free text, or a YES/NO fact to a
+    dollar amount. This never judges whether the value is factually
+    correct, only whether it's a plausible value of that type."""
+    v = (value or "").strip().upper()
+    if not v:
+        return False
+    if fact_type == "boolean":
+        return v in ("YES", "NO")
+    if fact_type == "numeric":
+        cleaned = v.replace("$", "").replace(",", "").strip()
+        try:
+            float(cleaned)
+            return True
+        except ValueError:
+            return False
+    return True  # "text" facts accept any non-empty value
 
 def run_entry_loop(report, chunk, chat_fn):
     """Run every checklist entry through process_entry. Returns a list of
