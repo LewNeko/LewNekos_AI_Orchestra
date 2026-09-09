@@ -74,6 +74,15 @@ to solve document-type-agnostic intelligent chunking in one shot — you
 can build the boring structural splitter for one format first and let 
 Auditor absorb the seams.
 
+This is the exact test case your architecture was built to handle. Notice what happened: the original $4,250.00 claim landed in chunk_0000 (Billing Details), and its correction landed in chunk_0001 (Adjustments) — a real header-boundary split, not a token-count accident. Reader running on chunk_0000 alone would see no revision and correctly report VERIFIED_NO_CHANGE for that pass; it's Auditor's job to notice chunk_0001 supersedes it. That's not a bug in the chunker — that's the seam Auditor exists for, playing out exactly as designed.
+
+A few things worth being deliberate about in this implementation:
+
+A header change forces a new chunk even under the size ceiling. That's why "Billing Details" and "Adjustments" never got merged into one 500-char chunk even though combined they'd fit — keeping header boundaries intact matters more for traceability ("Chunk 12, Section 3.2") than hitting the size target exactly.
+char_start/char_end are offsets into the original document, not the chunk itself — that's what lets you go from "Auditor flagged Fact A in chunk_0001" back to the exact bytes in the source file, which is the provenance guarantee your whole system depends on.
+What this does not handle yet: a single paragraph longer than max_chunk_chars (it'll just produce an oversized chunk rather than crash — the "never split mid-paragraph" rule wins over the size ceiling), and nested header semantics beyond flat concatenation (e.g. whether a ### under a ## should behave differently from a sibling ##). Neither came up in this test, but worth knowing they're unhandled rather than assuming they're covered.
+
+Since each chunk is already a plain string, this plugs straight into what you have — chunk["text"] is exactly what process_entry(chunk, entry, chat_fn) expects as chunk. Want to run Reader against these two real chunks next (using your actual checklist) to see whether chunk_0000's amount fact really does come back VERIFIED_NO_CHANGE as predicted, or do you want to stress-test the chunker itself first (e.g. an oversized paragraph, or a document with no headers at all)?
 
 regarding the orchestrator below ///////////////////////////////////////////////////////
 Mostly—your capability check is correct. It calls the right endpoint (/api/show) and 
