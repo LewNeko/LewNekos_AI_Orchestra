@@ -1,244 +1,79 @@
-prompt:
-i'm trying to get the verify pipeline right, but i end up with the following:
-[VERIFIED] 
-Does this chunk state a specific due date for payment?
-    answer: YES
-    quote:  The invoice was issued on March 3rd, 2024
---revisions below--
-REVISED: YES
-REVISION_QUOTE: The invoice was issued on March 3rd, 2024
-ORIGINAL_VALUE: 3
-DELTA_DIRECTION: DECREASE
-DELTA_VALUE: 1000
---computes:--
-None
---end of loop--
-[VERIFIED] 
-Does this chunk mention a late fee or penalty amount?
-    answer: NO
-    quote:  No late fee schedule is mentioned in this section.
---revisions below--
-REVISED: YES
-REVISION_QUOTE: They felt bad about that total amount due and made it a thousand dollars less.
-ORIGINAL_VALUE: 4250
-DELTA_DIRECTION: DECREASE
-DELTA_VALUE: 1000
---computes:--
-3250.0
---end of loop--
-[VERIFIED] 
-What's the amount due?
-    answer: $4,250.00
-    quote:  The total amount due is $4,250.00
---revisions below--
-REVISED: YES
-REVISION_QUOTE: They felt bad about that total amount due and made it a thousand dollars less.
-ORIGINAL_VALUE: 4250
-DELTA_DIRECTION: DECREASE
-DELTA_VALUE: 1000
---computes:--
-3250.0
---end of loop--
+Claude:
+your own Auditor/Verifier design, OpenViking's L0/L1/L2, and 
+Aider's repo-map all reduce to the same move — build a cheap structural 
+index over the large space first, rank by relevance to the current task, 
+and only load the small slice that matters into the model. Different 
+implementations (hierarchical summaries vs. a symbol/reference graph + 
+PageRank), same underlying principle: narrow before you spend tokens, and 
+don't let the narrowing layer be the thing you trust — it just decides 
+where to look.
+
+Here's the specific insight worth catching before you reach for either 
+tool, though: Aider's repo-map needs a structural representation to rank 
+over — for code, that's the symbol/call graph (which function references 
+which). You don't have that for documents... except you might already, 
+for free. The_Reader's output already is that structure. Every chunk that 
+goes through Reader produces {fact, claim, evidence, status} — that's 
+already an index of "which chunk asserts something about which fact." 
+If you aggregate Reader's outputs across all chunks into one table 
+(fact → list of chunks that mention it, with what they claimed), you've 
+built the exact kind of structural map Aider builds via tree-sitter 
+parsing — except yours comes as a byproduct of work you're already doing, 
+not a separate indexing pass over the raw document.
+
+Concretely, that means: when Auditor needs to resolve "does chunk 42 supersede chunk 17 on Fact A," it doesn't need OpenViking or an Aider-style graph to find the relevant chunks — it can just query the aggregated Reader-output table for "every chunk that produced a claim about Fact A," which is a plain lookup, not a search. Where OpenViking/Aider-style ranking earns its keep is a layer up from that: if you're running this over hundreds of documents rather than one, and Reader hasn't touched most of them yet, then you need something to answer "which of these 500 unprocessed chunks is even worth running Reader on for Fact A" — that's a pre-filter before Reader runs, not a replacement for what Reader+Auditor already give you for its own output.
+
+So the real design question becomes: is your bottleneck "too many chunks to run Reader on everything" (→ needs a pre-filter, OpenViking/Aider-style), or "Reader's already run on everything, now Auditor needs to find the right subset of results" (→ you already have what you need, it's just a lookup table)? Is there more context coming, or is that the question worth settling next?
+Me:
+It works together. I was thinking of an Aider as a useful tool to 
+split the large data into smaller chunks for the model, but I think 
+that'd be better for agentic usage on the repository itself rather 
+than the document/task the code of the repository is meant to accomplish 
+(i.e., augment and build on the spiral; it's not part of it). 
+But while OpenViking is a good piece with the pros you have 
+already stated, chunking isn't among them; I have yet to find a good 
+solution. Here's my problem written another way:
+
+ Document ->missing-> chunks 1 through 100 -> Reader -> The_Auditor 
+ and the rest of the domain model.
+
+Claude:
+That reframing is useful, and it points at something worth naming 
+directly: you've been evaluating Aider and OpenViking as chunker 
+candidates, but neither of them actually does chunking — they both 
+do relevance-ranking over an already-structured space. Aider's repo-map 
+ranks symbols that tree-sitter already extracted as discrete units 
+(functions, classes). OpenViking's L0/L1/L2 tiers presuppose something 
+already carved the corpus into documents/sections it can summarize. 
+Both tools start after the step you're missing. That's why neither one 
+has felt like a fit — you've been looking for a chunker in the 
+retrieval-and-ranking aisle, but that's genuinely a different problem 
+than "take one raw document and produce bounded, addressable pieces of 
+it."
+
+Here's the part that should lower the bar on what Chunker actually 
+needs to be: you already built Auditor specifically to catch what 
+naive chunk boundaries miss (a claim in chunk 17, its correction in 
+chunk 42). That means Chunker doesn't need to be smart about keeping 
+related facts together — that's explicitly Auditor's job, not Chunker's. 
+Chunker's actual bar is much lower than "intelligent segmentation": it 
+just needs to produce chunks that are (a) bounded to a reasonable size 
+for Reader's context, (b) aligned to structural boundaries humans would 
+recognize (a paragraph, a header section, an HTML article) rather than an 
+arbitrary token cutoff mid-sentence, and (c) individually addressable 
+with stable IDs + positional metadata, since your whole system's 
+credibility rests on being able to say "Chunk 12, Section 3.2" and have 
+that mean something. That's a parsing problem, not an agentic or ranking 
+problem — think python-docx walking headers, BeautifulSoup walking 
+<section>/<article> tags, or splitting markdown on #/## boundaries. 
+Boring, deterministic, no model call needed at all for the split itself.
+
+The reason this connects back to what we said about Auditor last time: 
+because Chunker is allowed to be "dumb" about boundaries, you don't need 
+to solve document-type-agnostic intelligent chunking in one shot — you 
+can build the boring structural splitter for one format first and let 
+Auditor absorb the seams.
 
-
-the first item is right on the first try, the reviser is citing itself so i made the computation send none, it needs work, but i've got a valid way to find the problem. I should say theres no need for a revision later on though, thats not the main point of this prompt either.
-
-
-the second item is also right on the first try, but the revisor is totally wrong, and is citing in a way i don't really know how to fix. it computes for a problem thats not there.
-
-
-the third item actually is wrong, and the revisor revises this properly, and the compute shows the right answer.
-
-
-i want to find a real way to tackle this second item because i don't know how to even fix that one compared to the others.
-
-
-AI reply
-
-I think the second item exposes a deeper issue in the reviser prompt design.
-
-For the question:
-
-Does this chunk mention a late fee or penalty amount?
-
-the extracted answer is:
-
-NO
- Quote: "No late fee schedule is mentioned in this section."
-
-Then the reviser sees:
-
-"They felt bad about that total amount due and made it a thousand dollars less."
-
-and concludes:
-
-REVISED: YES
-DELTA_DIRECTION: DECREASE
-DELTA_VALUE: 1000
-
-
-But that sentence is about the amount due, not the late fee.
-
-What's really happening?
-
-Your reviser is operating something like:
-
-Find numbers.
-Find change language ("less", "more", "reduced").
-Assume change == revision.
-
-It is not strongly grounding itself to the original fact being verified.
-
-The amount-due entry works because the revision sentence actually refers to:
-
-"that total amount due"
-
-which is the same fact.
-
-The late-fee entry fails because the reviser notices a revision somewhere in the chunk and
- doesn't check whether the revision is talking about the same subject.
-
-The test I would add
-
-Before computing anything, ask:
-
-Does the revision quote refer to the same entity/subject as the original quote?
-
-For example:
-
-Original quote
-No late fee schedule is mentioned in this section.
-
-Candidate revision
-They felt bad about that total amount due and made it a thousand dollars less.
-
-
-Extract topics:
-
-original_topic  = "late fee"
-revision_topic  = "amount due"
-
-
-Not equal:
-
-return REVISED = NO
-
-I would actually change the prompt
-
-You already started moving in the right direction with this instruction:
-
-Does any OTHER sentence in the chunk revise this SPECIFIC fact
-(not some other fact in the chunk)?
-
-Only answer YES if the revising sentence is clearly talking
-about the same thing as the ANSWER above.
-
-
-I'd make it even more explicit:
-
-A sentence is only a revision if it refers to the same subject.
-
-Examples:
-
-Original fact: amount due = $4250
-Revision: total amount due was reduced by $1000
-=> YES
-
-Original fact: no late fee schedule mentioned
-Revision: total amount due was reduced by $1000
-=> NO
-
-Original fact: invoice date March 3rd
-Revision: total amount due was reduced by $1000
-=> NO
-
-
-LLMs respond extremely well to contrastive examples like this.
-
-Another thing: skip revision checks for some question types
-
-Look at these two:
-
-Does this chunk state a specific due date for payment?
-
-
-and
-
-Does this chunk mention a late fee or penalty amount?
-
-
-These are existence questions.
-
-They aren't really numeric facts that can be "decreased by $1000".
-
-You could classify questions before revision:
-
-if entry["answer"] in ("YES", "NO"):
-    skip_revision_check()
-
-
-or
-
-FACT_TYPES = {
-    "existence",
-    "numeric",
-    "date",
-    "name"
-}
-
-
-Only run arithmetic revision logic on:
-
-What's the amount due?
-
-
-not
-
-Does the chunk mention X?
-
-What I think is the strongest fix
-
-I'd use a two-stage reviser:
-
-Stage 1
-
-Find candidate revision sentence.
-
-Did any later sentence modify or update the fact?
-
-Stage 2
-
-Validate relevance.
-
-Is the candidate revision talking about the same subject?
-
-Original Quote:
-"No late fee schedule is mentioned..."
-
-Candidate Revision:
-"They felt bad about that total amount due..."
-
-Answer YES/NO
-
-
-Only if Stage 2 returns YES do you run:
-
-compute_corrected_value(...)
-
-
-That solves all three of your examples:
-
-Item	Candidate Revision Found?	Same Subject?	Revision Applied?
-Due date	No	No	No
-Late fee	Yes	No	No
-Amount due	Yes	Yes	Yes
-
-The interesting thing is that the second failure isn't really a math 
-problem or even a revision problem. 
-It's a fact-linking problem. Your reviser needs to prove that a 
-candidate revision refers to the same underlying 
-fact before it's allowed to compute anything. 
-The amount-due case already gives you the pattern to validate against.
 
 regarding the orchestrator below ///////////////////////////////////////////////////////
 Mostly—your capability check is correct. It calls the right endpoint (/api/show) and 
