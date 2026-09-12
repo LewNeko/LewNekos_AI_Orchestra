@@ -5,3 +5,4 @@ __pycache__/
 *.pyd
 .cograph
 Documentation/MCP Client for ollama.md
+The_Voice/*
