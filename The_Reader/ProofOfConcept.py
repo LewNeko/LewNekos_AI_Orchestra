@@ -108,9 +108,16 @@ Fact
 
 #Check the response
 def main():
-    ENTRIES = parse_entries(run_checklist(CHUNK, CHECKLIST))  # pure response list
-    REPORT = verified_categorizer(verify(ENTRIES, CHUNK))     # response list, quote-verified + categorized
-    RESULTS = run_entry_loop(REPORT, CHUNK, chat_fn)           # closes the loop: repair -> support check -> revision check
+
+    ENTRIES = parse_entries(
+        run_checklist(CHUNK, CHECKLIST)
+        )  # pure response list
+    
+    REPORT = verified_categorizer(
+        verify(ENTRIES, CHUNK)
+        )     # response list, quote-verified + categorized
+    
+    RESULTS = run_entry_loop(REPORT, CHUNK, chat_fn)# closes the loop: repair -> support check -> revision check
     print_final_report(RESULTS)
 
     # FactHistory is the durable, cross-run record - built here per-question

@@ -30,10 +30,10 @@ except ImportError:
     )
 
 CHUNK = """The invoice was issued on March 3rd, 2024, to Acme
-"Corp. Payment terms are net-30. The total amount due is 
-"$4,250.00. No late fee schedule is mentioned in this section. 
-" They felt bad about that total amount due and made it a 
-"thousand dollars less."""
+Corp. Payment terms are net-30. The total amount due is 
+$4,250.00. No late fee schedule is mentioned in this section. 
+They felt bad about that total amount due and made it a 
+thousand dollars less."""
 # Simulating Gemma's actual raw output from your test
 RAW_OUTPUT = """ITEM: Does this chunk state a specific due date for payment?
 ANSWER: YES
@@ -50,25 +50,7 @@ QUOTE: The invoice was issued to Acme Corp.
 ITEM: What's the amount due?
 ANSWER: $4,250.00
 QUOTE: The total amount due is $4,250.00"""
-#Small prompt for the reviser model
-REVISION_CHECK_PROMPT = """You are checking whether a previously 
-extracted answer is still accurate given the FULL source chunk below.
 
-CHUNK:
-{chunk}
-
-An earlier step extracted this answer:
-ITEM: {item}
-ANSWER: {answer}
-QUOTE: {quote}
-Status: {status}
-Does any OTHER sentence in the chunk revise, correct, override, or update this specific fact?
-Respond in exactly this format:
-
-REVISED: YES or NO
-REVISION_QUOTE: <exact sentence that revises it, or NOT FOUND>
-CORRECTED_ANSWER: <the new value if revised, or SAME>
-"""
 #Retry prompt used ONLY when the exact quote failed verification.
 #Deliberately narrow: it must NOT be allowed to change the answer,
 #only find a better (exact) supporting sentence.
@@ -190,13 +172,15 @@ def compute_corrected_value(revision_result_text, entry = None):
     elif direction == "MULTIPLIED":
         return original * delta
     return None
-
+#(function) def parse_entries(raw_output: Any) -> list
 def parse_entries(raw_output):
     """Split raw model output into ITEM/ANSWER/QUOTE blocks."""
     entries = []
     blocks = re.split(r'(?=ITEM:)', raw_output.strip())
     for block in blocks:
-        if not block.strip():
+        if not block.strip(): 
+            #i noticed the first loop makes the block variable contain "" 
+            #and this catches it and runs the next loop which has actual data.
             continue
         item_match = re.search(r'ITEM:\s*(.+)', block)
         answer_match = re.search(r'ANSWER:\s*(.+)', block)
@@ -410,7 +394,7 @@ def process_entry(chunk, entry, chat_fn):
     FactHistory out of one or more ReaderResults is a separate step.
     """
     question = entry["item"]
-    fact_type = classify_fact_type(entry["answer"])
+    fact_type = classify_fact_type(entry["answer"]) #boolean, numeric, or text
     initial_claim = FactClaim(value=entry["answer"], evidence=Evidence(entry["quote"]))
 
     if entry["status"] == "MISSING_FIELDS":
