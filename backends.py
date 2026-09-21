@@ -156,6 +156,7 @@ gemma3:4b                a2af6cc3eb7f    3.3 GB
 BACKENDS = {
     "ollama-qwen3:4b": lambda: OllamaBackend(model="qwen3:4b"),
     "ollama-qwen3:8b": lambda: OllamaBackend(model="qwen3:8b"),
+    "ollama-gemma4": lambda: OllamaBackend(model="gemma4:e2b"),
     "ollama-qwen3-coder": lambda: OllamaBackend(model="qwen3-coder:latest"),
     "ollama-embed4gemma": lambda: OllamaBackend(model="embeddinggemma:latest"),
     "ollama": lambda: OllamaBackend(model="gemma3:4b"),

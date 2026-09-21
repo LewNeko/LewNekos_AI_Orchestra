@@ -1,7 +1,7 @@
 <map version="freeplane 1.12.15">
 <!--To view this file, download free mind mapping software Freeplane from https://www.freeplane.org -->
 <bookmarks/>
-<node TEXT="LewNekos Ai Orchestra" LOCALIZED_STYLE_REF="AutomaticLayout.level.root" FOLDED="false" ID="ID_1090958577" CREATED="1409300609620" MODIFIED="1789664598888"><hook NAME="MapStyle" background="#2e3440ff" zoom="0.82644624">
+<node TEXT="LewNekos Ai Orchestra" LOCALIZED_STYLE_REF="AutomaticLayout.level.root" FOLDED="false" ID="ID_1090958577" CREATED="1409300609620" MODIFIED="1789864978107"><hook NAME="MapStyle" background="#2e3440ff" zoom="1.1">
     <properties show_icon_for_attributes="true" edgeColorConfiguration="#808080ff,#ff0000ff,#0000ffff,#00ff00ff,#ff00ffff,#00ffffff,#7c0000ff,#00007cff,#007c00ff,#7c007cff,#007c7cff,#7c7c00ff" auto_compact_layout="true" show_tags="UNDER_NODES" show_note_icons="true" associatedTemplateLocation="template:/dark_nord_template.mm" fit_to_viewport="false" show_icons="BESIDE_NODES" showTagCategories="false"/>
     <tags category_separator="::"/>
 
@@ -85,7 +85,7 @@
 <font BOLD="true"/>
 <node TEXT="The Chunker" POSITION="bottom_or_right" ID="ID_638293671" CREATED="1789664601823" MODIFIED="1789664606404"/>
 <node TEXT="The Reader" POSITION="bottom_or_right" ID="ID_1038334280" CREATED="1789664606803" MODIFIED="1789754139267">
-<node TEXT="Debugging" FOLDED="true" ID="ID_278122633" CREATED="1789664724653" MODIFIED="1789754139266" HGAP_QUANTITY="20.75 pt" VSHIFT_QUANTITY="-12 pt">
+<node TEXT="Debugging" ID="ID_278122633" CREATED="1789664724653" MODIFIED="1789754139266" HGAP_QUANTITY="20.75 pt" VSHIFT_QUANTITY="-12 pt">
 <node TEXT="Usage" POSITION="bottom_or_right" ID="ID_1268043118" CREATED="1789664623703" MODIFIED="1789664704508"><richcontent TYPE="DETAILS">
 <html>
   <head>
@@ -111,15 +111,18 @@
   </body>
 </html></richcontent>
 <node TEXT="Global Variables" FOLDED="true" ID="ID_170822824" CREATED="1789664792785" MODIFIED="1789666123837">
-<node TEXT="CHUNK" ID="ID_174092654" CREATED="1789664880027" MODIFIED="1789752530840" HGAP_QUANTITY="202.99999 pt">
+<node TEXT="CHUNK" ID="ID_174092654" CREATED="1789664880027" MODIFIED="1789846090247" HGAP_QUANTITY="202.99999 pt">
 <arrowlink DESTINATION="ID_706442367" STARTINCLINATION="435.74999 pt;0 pt;" ENDINCLINATION="262.49999 pt;0 pt;"/>
 <arrowlink DESTINATION="ID_20335950" STARTINCLINATION="290.99999 pt;0 pt;" ENDINCLINATION="443.99999 pt;0 pt;"/>
-<arrowlink DESTINATION="ID_207492586" STARTINCLINATION="397.49999 pt;-6.75 pt;" ENDINCLINATION="1032.74997 pt;0 pt;"/>
+<arrowlink DESTINATION="ID_207492586" STARTINCLINATION="397.49999 pt;-5.25 pt;" ENDINCLINATION="1032.74997 pt;0 pt;"/>
 <arrowlink DESTINATION="ID_261134295" STARTINCLINATION="875.99997 pt;0 pt;" ENDINCLINATION="1211.99996 pt;150.75 pt;"/>
-<arrowlink DESTINATION="ID_654349185" STARTINCLINATION="1903.49994 pt;0 pt;" ENDINCLINATION="2054.24994 pt;0 pt;"/>
+<arrowlink DESTINATION="ID_654349185" STARTINCLINATION="1903.49994 pt;0 pt;" ENDINCLINATION="2057.24994 pt;0 pt;"/>
 <arrowlink DESTINATION="ID_1816586628" STARTINCLINATION="1975.49994 pt;0 pt;" ENDINCLINATION="1719.74995 pt;663.74998 pt;"/>
 <arrowlink DESTINATION="ID_1090322771" STARTINCLINATION="1248.74996 pt;0 pt;" ENDINCLINATION="1529.99995 pt;0 pt;"/>
-<arrowlink DESTINATION="ID_1393713918"/>
+<arrowlink DESTINATION="ID_1393713918" STARTINCLINATION="1119.74997 pt;0 pt;" ENDINCLINATION="1119.74997 pt;0 pt;"/>
+<arrowlink DESTINATION="ID_652868881" STARTINCLINATION="904.49997 pt;0 pt;" ENDINCLINATION="1140.74997 pt;0 pt;"/>
+<arrowlink DESTINATION="ID_16314295" STARTINCLINATION="969.74997 pt;0 pt;" ENDINCLINATION="1505.24996 pt;0 pt;"/>
+<arrowlink DESTINATION="ID_1146012158" STARTINCLINATION="1036.49997 pt;0 pt;" ENDINCLINATION="1724.99995 pt;0 pt;"/>
 <richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
@@ -142,6 +145,7 @@
     </div>
   </body>
 </html></richcontent>
+<font SIZE="30"/>
 </node>
 <node TEXT="CHECKLIST" ID="ID_771367975" CREATED="1789665178136" MODIFIED="1789666123835" HGAP_QUANTITY="127.25 pt">
 <arrowlink DESTINATION="ID_706442367"/>
@@ -237,8 +241,8 @@
 </html></richcontent>
 </node>
 </node>
-<node TEXT="Functions" FOLDED="true" ID="ID_150758922" CREATED="1789665355718" MODIFIED="1789669278416">
-<node TEXT="Main" ID="ID_1442991968" CREATED="1789665378994" MODIFIED="1789736784855">
+<node TEXT="Functions" ID="ID_150758922" CREATED="1789665355718" MODIFIED="1789669278416">
+<node TEXT="Main" FOLDED="true" ID="ID_1442991968" CREATED="1789665378994" MODIFIED="1789736784855">
 <node TEXT="Description" ID="ID_1630711791" CREATED="1789676108941" MODIFIED="1789676170793"><richcontent TYPE="DETAILS">
 <html>
   <head>
@@ -264,7 +268,7 @@
   </body>
 </html></richcontent>
 <node TEXT="ENTRIES" POSITION="bottom_or_right" ID="ID_1064171224" CREATED="1789665503736" MODIFIED="1789671033373" VSHIFT_QUANTITY="-48 pt">
-<arrowlink DESTINATION="ID_951783292" STARTINCLINATION="2.25 pt;39 pt;" ENDINCLINATION="-2.25 pt;-33.75 pt;"/>
+<arrowlink DESTINATION="ID_951783292" STARTINCLINATION="2.25 pt;39 pt;" ENDINCLINATION="-0.75 pt;-32.25 pt;"/>
 <node TEXT="Parse_entries" ID="ID_519813200" CREATED="1789665559549" MODIFIED="1789671042046" VSHIFT_QUANTITY="-25.5 pt">
 <node TEXT="run_checklist" ID="ID_1478107506" CREATED="1789665579912" MODIFIED="1789665587640">
 <node TEXT="CHUNK" ID="ID_20335950" CREATED="1789665589147" MODIFIED="1789666102491"/>
@@ -273,7 +277,7 @@
 </node>
 </node>
 <node TEXT="REPORT" POSITION="bottom_or_right" ID="ID_817486962" CREATED="1789665517339" MODIFIED="1789665862863">
-<arrowlink DESTINATION="ID_11820885" STARTINCLINATION="1.5 pt;26.25 pt;" ENDINCLINATION="-0.75 pt;-33 pt;"/>
+<arrowlink DESTINATION="ID_11820885" STARTINCLINATION="1.5 pt;26.25 pt;" ENDINCLINATION="0 pt;-31.5 pt;"/>
 <node TEXT="verified_categorizer" ID="ID_1022280044" CREATED="1789665627419" MODIFIED="1789665635269">
 <node TEXT="verify" ID="ID_140101535" CREATED="1789665635719" MODIFIED="1789665638624">
 <node TEXT="ENTRIES" ID="ID_951783292" CREATED="1789665639100" MODIFIED="1789665643106"/>
@@ -282,7 +286,7 @@
 </node>
 </node>
 <node TEXT="RESULTS" POSITION="bottom_or_right" ID="ID_1495870140" CREATED="1789665522770" MODIFIED="1789666031594" VSHIFT_QUANTITY="65.25 pt">
-<arrowlink DESTINATION="ID_1505067515" STARTINCLINATION="1.5 pt;33.75 pt;" ENDINCLINATION="-1.5 pt;-43.5 pt;"/>
+<arrowlink DESTINATION="ID_1505067515" STARTINCLINATION="1.5 pt;33.75 pt;" ENDINCLINATION="0 pt;-42 pt;"/>
 <node TEXT="run_entry_loop" ID="ID_699899839" CREATED="1789665682427" MODIFIED="1789665706459">
 <node TEXT="REPORT" ID="ID_11820885" CREATED="1789665707081" MODIFIED="1789665709506"/>
 <node TEXT="CHUNK" ID="ID_261134295" CREATED="1789665710649" MODIFIED="1789665712743"/>
@@ -308,7 +312,7 @@
 </node>
 </node>
 </node>
-<node TEXT="run_checklist" ID="ID_122461629" CREATED="1789666222521" MODIFIED="1789669282500" VSHIFT_QUANTITY="14.25 pt"><richcontent TYPE="DETAILS">
+<node TEXT="run_checklist" FOLDED="true" ID="ID_122461629" CREATED="1789666222521" MODIFIED="1789669282500" VSHIFT_QUANTITY="14.25 pt"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -328,7 +332,7 @@
     </p>
   </body>
 </html></richcontent>
-<node TEXT="Description" ID="ID_1292057612" CREATED="1789666501205" MODIFIED="1789667384181" HGAP_QUANTITY="92.75 pt" VSHIFT_QUANTITY="4.5 pt"><richcontent TYPE="DETAILS" HIDDEN="true">
+<node TEXT="Description" ID="ID_1292057612" CREATED="1789666501205" MODIFIED="1789667384181" HGAP_QUANTITY="92.75 pt" VSHIFT_QUANTITY="4.5 pt"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -394,6 +398,49 @@
 <node TEXT="chunk" ID="ID_1090322771" CREATED="1789736718231" MODIFIED="1789736720484"/>
 </node>
 </node>
+<node TEXT="chat_fn" FOLDED="true" ID="ID_232004273" CREATED="1789841094622" MODIFIED="1789842832432">
+<node TEXT="Description" ID="ID_52100063" CREATED="1789841112600" MODIFIED="1789841247305"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      prompts the backend.chat for the models reply and then returns the content of the reply
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="variables" ID="ID_351754642" CREATED="1789841118780" MODIFIED="1789841127259">
+<node TEXT="reply" ID="ID_1364969145" CREATED="1789841191968" MODIFIED="1789841204143"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      reply = backend.chat([{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}])
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+<node TEXT="return" FOLDED="true" ID="ID_1163191914" CREATED="1789841130160" MODIFIED="1789846158761" VSHIFT_QUANTITY="-40.5 pt">
+<arrowlink DESTINATION="ID_1678275474" STARTINCLINATION="860.24997 pt;0 pt;" ENDINCLINATION="1398.74996 pt;0 pt;"/>
+<richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      The model's reply is returned here
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="return reply[&quot;content&quot;]" ID="ID_512396758" CREATED="1789841169353" MODIFIED="1789841186550"/>
+</node>
+</node>
 </node>
 </node>
 <node TEXT="Verification" ID="ID_1765860321" CREATED="1789671195082" MODIFIED="1789671234165"><richcontent TYPE="DETAILS">
@@ -407,9 +454,9 @@
     </p>
   </body>
 </html></richcontent>
-<node TEXT="Global Variables" FOLDED="true" POSITION="bottom_or_right" ID="ID_1088431803" CREATED="1789752270192" MODIFIED="1789752275664">
-<node TEXT="CHUNK" ID="ID_1393713918" CREATED="1789752371422" MODIFIED="1789752406782"/>
-<node TEXT="RAW_OUTPUT" ID="ID_1969602781" CREATED="1789752407258" MODIFIED="1789752940483"><richcontent TYPE="DETAILS">
+<node TEXT="Global Variables" FOLDED="true" POSITION="bottom_or_right" ID="ID_1088431803" CREATED="1789752270192" MODIFIED="1789842828399">
+<node TEXT="CHUNK" ID="ID_1393713918" CREATED="1789752371422" MODIFIED="1789842871027" HGAP_QUANTITY="325.24999 pt" VSHIFT_QUANTITY="31.5 pt"/>
+<node TEXT="RAW_OUTPUT" ID="ID_1969602781" CREATED="1789752407258" MODIFIED="1789842866690" HGAP_QUANTITY="236.74999 pt"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -421,7 +468,7 @@
   </body>
 </html></richcontent>
 </node>
-<node TEXT="QUOTE_REPAIR_PROMPT" ID="ID_1586841992" CREATED="1789752419109" MODIFIED="1789753927449"><richcontent TYPE="DETAILS" HIDDEN="true">
+<node TEXT="QUOTE_REPAIR_PROMPT" ID="ID_1586841992" CREATED="1789752419109" MODIFIED="1789842863561" HGAP_QUANTITY="146.75 pt"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -481,7 +528,9 @@
   </body>
 </html></richcontent>
 </node>
-<node TEXT="ANSWER_SUPPORT_PROMPT" ID="ID_384433237" CREATED="1789752426123" MODIFIED="1789753944313"><richcontent TYPE="DETAILS" HIDDEN="true">
+<node TEXT="ANSWER_SUPPORT_PROMPT" ID="ID_384433237" CREATED="1789752426123" MODIFIED="1789842860723" HGAP_QUANTITY="68.75 pt">
+<arrowlink DESTINATION="ID_1861284021" STARTINCLINATION="2926.49991 pt;0 pt;" ENDINCLINATION="2180.99994 pt;0 pt;"/>
+<richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -641,8 +690,8 @@
 </html></richcontent>
 </node>
 </node>
-<node TEXT="Functions" POSITION="bottom_or_right" ID="ID_1020765829" CREATED="1789752235892" MODIFIED="1789752269450">
-<node TEXT="parse_entries" FOLDED="true" POSITION="bottom_or_right" ID="ID_84979234" CREATED="1789667447869" MODIFIED="1789671156128" HGAP_QUANTITY="11.75 pt" VSHIFT_QUANTITY="-21.75 pt"><richcontent TYPE="DETAILS">
+<node TEXT="Functions" POSITION="bottom_or_right" ID="ID_1020765829" CREATED="1789752235892" MODIFIED="1789837632915">
+<node TEXT="parse_entries" POSITION="bottom_or_right" ID="ID_84979234" CREATED="1789667447869" MODIFIED="1789837632914" HGAP_QUANTITY="11.75 pt" VSHIFT_QUANTITY="-1.5 pt"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -655,7 +704,7 @@
     </div>
   </body>
 </html></richcontent>
-<node TEXT="Description" ID="ID_30953802" CREATED="1789668791663" MODIFIED="1789670063712"><richcontent TYPE="DETAILS" HIDDEN="true">
+<node TEXT="Description" ID="ID_30953802" CREATED="1789668791663" MODIFIED="1789670063712"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -796,7 +845,7 @@
 </node>
 </node>
 </node>
-<node TEXT="verify" FOLDED="true" POSITION="bottom_or_right" ID="ID_327177511" CREATED="1789671385243" MODIFIED="1789673044007"><richcontent TYPE="DETAILS">
+<node TEXT="verify" FOLDED="true" POSITION="bottom_or_right" ID="ID_327177511" CREATED="1789671385243" MODIFIED="1789673044007"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -938,7 +987,7 @@
 <node TEXT="chunk" POSITION="bottom_or_right" ID="ID_1816586628" CREATED="1789736665420" MODIFIED="1789737045850" HGAP_QUANTITY="25.25 pt" VSHIFT_QUANTITY="-36 pt"/>
 </node>
 </node>
-<node TEXT="verified_categorizer" FOLDED="true" POSITION="bottom_or_right" ID="ID_1594185122" CREATED="1789673088013" MODIFIED="1789673183120"><richcontent TYPE="DETAILS">
+<node TEXT="verified_categorizer" FOLDED="true" POSITION="bottom_or_right" ID="ID_1594185122" CREATED="1789673088013" MODIFIED="1789673183120"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1043,7 +1092,7 @@
 </node>
 </node>
 </node>
-<node TEXT="run_entry_loop" FOLDED="true" POSITION="bottom_or_right" ID="ID_1013130169" CREATED="1789673204995" MODIFIED="1789673931768"><richcontent TYPE="DETAILS">
+<node TEXT="run_entry_loop" FOLDED="true" POSITION="bottom_or_right" ID="ID_1013130169" CREATED="1789673204995" MODIFIED="1789673931768"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1130,7 +1179,7 @@
 </node>
 </node>
 </node>
-<node TEXT="process_entry" FOLDED="true" POSITION="bottom_or_right" ID="ID_1184046653" CREATED="1789736965941" MODIFIED="1789737746090"><richcontent TYPE="DETAILS">
+<node TEXT="process_entry" POSITION="bottom_or_right" ID="ID_1184046653" CREATED="1789736965941" MODIFIED="1789833091710"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1153,7 +1202,7 @@
     </p>
   </body>
 </html></richcontent>
-<node TEXT="Description" ID="ID_390966359" CREATED="1789737149812" MODIFIED="1789737158503"><richcontent TYPE="DETAILS">
+<node TEXT="Description" ID="ID_390966359" CREATED="1789737149812" MODIFIED="1789737158503"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1171,7 +1220,7 @@
   </body>
 </html></richcontent>
 </node>
-<node TEXT="Return" ID="ID_705053004" CREATED="1789737159397" MODIFIED="1789748194291" HGAP_QUANTITY="192.49999 pt" VSHIFT_QUANTITY="54.75 pt"><richcontent TYPE="DETAILS">
+<node TEXT="Return" FOLDED="true" ID="ID_705053004" CREATED="1789737159397" MODIFIED="1789748194291" HGAP_QUANTITY="192.49999 pt" VSHIFT_QUANTITY="54.75 pt"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1182,58 +1231,13 @@
     </p>
   </body>
 </html></richcontent>
-<node TEXT="NEEDS_REVIEW" ID="ID_1852003576" CREATED="1789748231844" MODIFIED="1789748534896">
-<node TEXT="if entry[&quot;status&quot;] == &quot;MISSING_FIELDS&quot;" ID="ID_939286691" CREATED="1789748279077" MODIFIED="1789748534895" VSHIFT_QUANTITY="-68.25 pt"><richcontent TYPE="DETAILS">
-<html>
-  <head>
-    
-  </head>
-  <body>
-    <p>
-      One or more of item/answer/quote were missing from the model output.
-    </p>
-  </body>
-</html></richcontent>
-<node TEXT="return ReaderResult(&#xa;            question=question, fact_type=fact_type, initial_claim=initial_claim,&#xa;            status=&quot;NEEDS_REVIEW&quot;,&#xa;            reason=&quot;One or more of item/answer/quote were missing from the model output.&quot;,&#xa;        )" ID="ID_1602670822" CREATED="1789748553214" MODIFIED="1789748564434" HGAP_QUANTITY="30.5 pt" VSHIFT_QUANTITY="-63.75 pt"/>
+<node TEXT="NEEDS_REVIEW" ID="ID_1852003576" CREATED="1789748231844" MODIFIED="1789748534896"/>
+<node TEXT="" ID="ID_451373110" CREATED="1789748498307" MODIFIED="1789748498307"/>
 </node>
-<node TEXT="quote_status problems" ID="ID_343415676" CREATED="1789748344845" MODIFIED="1789748483577"><richcontent TYPE="DETAILS">
-<html>
-  <head>
-    
-  </head>
-  <body>
-    <p>
-      Quote could not be verified even after a repair attempt.
-    </p>
-  </body>
-</html></richcontent>
-<node ID="ID_1610799323" CREATED="1789748468535" MODIFIED="1789748468535"><richcontent TYPE="NODE">
-
-<html>
-  <head>
-    
-  </head>
-  <body>
-    <div style="color: #bbbebf; background-color: #121314; font-family: Consolas, Courier New, monospace; font-weight: normal; font-size: 14px; line-height: 19px; white-space: pre">
-      <div>
-        <span style="color: #c586c0;">if</span><span style="color: #bbbebf;">&#xa0;</span><span style="color: #c9d1d9;">candidate</span><span style="color: #bbbebf;">&#xa0; </span><span style="color: #569cd6;">and</span><span style="color: #bbbebf;">&#xa0;</span><span style="color: #c9d1d9;">candidate</span><span style="color: #bbbebf;">.</span><span style="color: #d2a8ff;">upper</span><span style="color: #bbbebf;">() </span><span style="color: #d4d4d4;">!=</span><span style="color: #bbbebf;">&#xa0;</span><span style="color: #a5d6ff;">&quot;NOT FOUND&quot;</span><span style="color: #bbbebf;">&#xa0;</span><span style="color: #569cd6;">and</span><span style="color: #bbbebf;">&#xa0; </span><span style="color: #d2a8ff;">normalize</span><span style="color: #bbbebf;">(</span><span style="color: #c9d1d9;">candidate</span><span style="color: #bbbebf;">) </span><span style="color: #569cd6;">in</span><span style="color: #bbbebf;">&#xa0;</span><span style="color: #d2a8ff;">normalize</span><span style="color: #bbbebf;">(</span><span style="color: #ffa657;">chunk</span><span style="color: #bbbebf;">):</span>
-      </div>
-    </div>
-  </body>
-</html>
-</richcontent>
-</node>
-<node TEXT="else:&#xa;            return ReaderResult(&#xa;                question=question, fact_type=fact_type, initial_claim=initial_claim,&#xa;                status=&quot;NEEDS_REVIEW&quot;,&#xa;                reason=&quot;Quote could not be verified even after a repair attempt.&quot;,&#xa;            )" ID="ID_1596979813" CREATED="1789748526725" MODIFIED="1789748528497"/>
-</node>
-</node>
-<node TEXT="" ID="ID_451373110" CREATED="1789748498307" MODIFIED="1789748498307">
-<node TEXT="return ReaderResult(&#xa;        question=question, fact_type=fact_type, initial_claim=initial_claim,&#xa;        evidence_repair=evidence_repair, support_judgment=support_judgment,&#xa;        corrected_claim=corrected_claim,&#xa;        status=_terminal_status(corrected_claim, evidence_repair),&#xa;    )" ID="ID_1175943346" CREATED="1789737181255" MODIFIED="1789737200266"/>
-</node>
-</node>
-<node TEXT="variables" ID="ID_1015813019" CREATED="1789737251392" MODIFIED="1789737778123" HGAP_QUANTITY="171.5 pt" VSHIFT_QUANTITY="54 pt">
-<node TEXT="question" ID="ID_403066825" CREATED="1789738106785" MODIFIED="1789751847575">
-<arrowlink DESTINATION="ID_234163719"/>
-<richcontent TYPE="DETAILS">
+<node TEXT="variables" ID="ID_1015813019" CREATED="1789737251392" MODIFIED="1789829105024" HGAP_QUANTITY="370.99999 pt" VSHIFT_QUANTITY="68.25 pt">
+<node TEXT="question" ID="ID_403066825" CREATED="1789738106785" MODIFIED="1789847766646" HGAP_QUANTITY="357.49999 pt" VSHIFT_QUANTITY="46.5 pt">
+<arrowlink DESTINATION="ID_234163719" STARTINCLINATION="718.49998 pt;0 pt;" ENDINCLINATION="773.24998 pt;0 pt;"/>
+<richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1245,7 +1249,7 @@
   </body>
 </html></richcontent>
 </node>
-<node TEXT="fact_type" ID="ID_161050942" CREATED="1789738110452" MODIFIED="1789747415415"><richcontent TYPE="DETAILS">
+<node TEXT="fact_type" FOLDED="true" ID="ID_161050942" CREATED="1789738110452" MODIFIED="1789847706442" HGAP_QUANTITY="299.74999 pt" VSHIFT_QUANTITY="9 pt"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1258,7 +1262,7 @@
 </html></richcontent>
 <node TEXT="classify_fact_type" ID="ID_807929403" CREATED="1789747412628" MODIFIED="1789752062195" HGAP_QUANTITY="43.25 pt" VSHIFT_QUANTITY="-66 pt"/>
 </node>
-<node TEXT="initial_claim" ID="ID_775595321" CREATED="1789738114760" MODIFIED="1789747316001"><richcontent TYPE="DETAILS">
+<node TEXT="initial_claim" FOLDED="true" ID="ID_775595321" CREATED="1789738114760" MODIFIED="1789847704374" HGAP_QUANTITY="234.49999 pt"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1297,9 +1301,11 @@
 </node>
 </node>
 </node>
-<node TEXT="working_claim" ID="ID_199684046" CREATED="1789747245982" MODIFIED="1789751844215">
-<arrowlink DESTINATION="ID_234163719"/>
-<richcontent TYPE="DETAILS">
+<node TEXT="working_claim" ID="ID_199684046" CREATED="1789747245982" MODIFIED="1789848343821" HGAP_QUANTITY="158.75 pt">
+<arrowlink TRANSPARENCY="60" DESTINATION="ID_234163719" STARTINCLINATION="547.49998 pt;0 pt;" ENDINCLINATION="9 pt;-11.25 pt;"/>
+<arrowlink DESTINATION="ID_820419289" STARTINCLINATION="794.24998 pt;0 pt;" ENDINCLINATION="1529.24995 pt;-43.5 pt;"/>
+<arrowlink DESTINATION="ID_104873764" STARTINCLINATION="556.49998 pt;0 pt;" ENDINCLINATION="1733.99995 pt;-230.99999 pt;"/>
+<richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1311,7 +1317,7 @@
   </body>
 </html></richcontent>
 </node>
-<node TEXT="quote_status" ID="ID_438133223" CREATED="1789747250520" MODIFIED="1789747355538"><richcontent TYPE="DETAILS">
+<node TEXT="quote_status" ID="ID_438133223" CREATED="1789747250520" MODIFIED="1789847700550" HGAP_QUANTITY="92.75 pt"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1323,7 +1329,7 @@
   </body>
 </html></richcontent>
 </node>
-<node TEXT="evidence_repair" ID="ID_1209944517" CREATED="1789747260650" MODIFIED="1789748743736"><richcontent TYPE="DETAILS">
+<node TEXT="evidence_repair" ID="ID_1209944517" CREATED="1789747260650" MODIFIED="1789864281443" VSHIFT_QUANTITY="-23.25 pt"><richcontent TYPE="DETAILS" HIDDEN="true">
 <html>
   <head>
     
@@ -1335,7 +1341,10 @@
   </body>
 </html></richcontent>
 </node>
-<node TEXT="raw_support" ID="ID_385014943" CREATED="1789751546746" MODIFIED="1789751802944"><richcontent TYPE="DETAILS">
+<node TEXT="raw_support" ID="ID_385014943" CREATED="1789751546746" MODIFIED="1789864310326" HGAP_QUANTITY="81.5 pt" VSHIFT_QUANTITY="45.75 pt">
+<arrowlink DESTINATION="ID_1996303096" STARTINCLINATION="287.99999 pt;-206.99999 pt;" ENDINCLINATION="1058.99997 pt;0 pt;"/>
+<arrowlink DESTINATION="ID_505928251" STARTINCLINATION="278.99999 pt;-237.74999 pt;" ENDINCLINATION="1262.24996 pt;-125.25 pt;"/>
+<richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -1352,13 +1361,13 @@
     </p>
   </body>
 </html></richcontent>
-<node TEXT="check_answer_support" ID="ID_1220506722" CREATED="1789751764610" MODIFIED="1789751772024">
+<node TEXT="check_answer_support" ID="ID_1220506722" CREATED="1789751764610" MODIFIED="1789847717934" HGAP_QUANTITY="23.75 pt" VSHIFT_QUANTITY="-3.75 pt">
 <node TEXT="chunk" ID="ID_652868881" CREATED="1789751775760" MODIFIED="1789751785523"/>
 <node TEXT="{&quot;item&quot;: question, &quot;answer&quot;: working_claim.value, &quot;quote&quot;: working_claim.evidence.quote}" ID="ID_234163719" CREATED="1789751785999" MODIFIED="1789751808667"/>
 <node TEXT="chat_fn" ID="ID_1678275474" CREATED="1789751809449" MODIFIED="1789751813990"/>
 </node>
 </node>
-<node TEXT="support_judgement" ID="ID_713851143" CREATED="1789751698835" MODIFIED="1789751746246"><richcontent TYPE="DETAILS">
+<node TEXT="support_judgement" ID="ID_713851143" CREATED="1789751698835" MODIFIED="1789864188793" VSHIFT_QUANTITY="25.5 pt" TEXT_SHORTENED="true"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -1369,8 +1378,13 @@
     </p>
   </body>
 </html></richcontent>
+<node TEXT="judge_support" ID="ID_1910092172" CREATED="1789845481501" MODIFIED="1789864259039" VSHIFT_QUANTITY="-33 pt">
+<node TEXT="raw_support" ID="ID_1996303096" CREATED="1789845496366" MODIFIED="1789845501517"/>
+<node TEXT="working_claim" ID="ID_820419289" CREATED="1789845491837" MODIFIED="1789845495983"/>
+<node TEXT="chunk" ID="ID_16314295" CREATED="1789845501783" MODIFIED="1789864262053" VSHIFT_QUANTITY="-27 pt"/>
 </node>
-<node TEXT="corrected_claim" ID="ID_1417205328" CREATED="1789751713993" MODIFIED="1789751749388"><richcontent TYPE="DETAILS">
+</node>
+<node TEXT="corrected_claim" ID="ID_1417205328" CREATED="1789751713993" MODIFIED="1789864253664" VSHIFT_QUANTITY="39 pt" TEXT_SHORTENED="true"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -1381,9 +1395,14 @@
     </p>
   </body>
 </html></richcontent>
+<node TEXT="judge_support" ID="ID_304010758" CREATED="1789845481501" MODIFIED="1789864253663" VSHIFT_QUANTITY="-33.75 pt">
+<node TEXT="raw_support" ID="ID_505928251" CREATED="1789845496366" MODIFIED="1789845501517"/>
+<node TEXT="working_claim" ID="ID_104873764" CREATED="1789845491837" MODIFIED="1789845495983"/>
+<node TEXT="chunk" ID="ID_1146012158" CREATED="1789845501783" MODIFIED="1789864267215" VSHIFT_QUANTITY="-27 pt"/>
 </node>
 </node>
-<node TEXT="Step 0" ID="ID_781371173" CREATED="1789747606872" MODIFIED="1789747708278" HGAP_QUANTITY="186.49999 pt" VSHIFT_QUANTITY="48 pt"><richcontent TYPE="DETAILS">
+</node>
+<node TEXT="Step 0" ID="ID_781371173" CREATED="1789747606872" MODIFIED="1789829100533" HGAP_QUANTITY="327.49999 pt" VSHIFT_QUANTITY="48 pt"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -1394,9 +1413,7 @@
     </p>
   </body>
 </html></richcontent>
-<node TEXT="Description" ID="ID_1568508010" CREATED="1789747632442" MODIFIED="1789748340596">
-<arrowlink DESTINATION="ID_939286691"/>
-<richcontent TYPE="DETAILS">
+<node TEXT="Description" ID="ID_1568508010" CREATED="1789747632442" MODIFIED="1789832730655"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -1408,8 +1425,41 @@
   </body>
 </html></richcontent>
 </node>
+<node TEXT="If entry[&quot;status&apos;] is MISSING_FIELDS" ID="ID_39528577" CREATED="1789832220092" MODIFIED="1789832341917">
+<node TEXT="true" ID="ID_1106073580" CREATED="1789832253258" MODIFIED="1789832263966">
+<node TEXT="returns" ID="ID_845883671" CREATED="1789832267334" MODIFIED="1789832897126">
+<arrowlink DESTINATION="ID_1852003576" STARTINCLINATION="1709.24995 pt;0 pt;" ENDINCLINATION="1232.24996 pt;0 pt;"/>
+<richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      return ReaderResult(
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;question=question, fact_type=fact_type, initial_claim=initial_claim,
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;status=&quot;NEEDS_REVIEW&quot;,
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;reason=&quot;One or more of item/answer/quote were missing from the model output.&quot;,
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;)
+    </p>
+  </body>
+</html></richcontent>
 </node>
-<node TEXT="Step 1" ID="ID_1325611938" CREATED="1789737314124" MODIFIED="1789747812722" HGAP_QUANTITY="136.25 pt" VSHIFT_QUANTITY="35.25 pt"><richcontent TYPE="DETAILS">
+</node>
+<node TEXT="false" ID="ID_523326762" CREATED="1789832305790" MODIFIED="1789845878112" HGAP_QUANTITY="14 pt" VSHIFT_QUANTITY="20.25 pt">
+<arrowlink DESTINATION="ID_1325611938" STARTINCLINATION="10.5 pt;34.5 pt;" ENDINCLINATION="-9.75 pt;-104.25 pt;"/>
+</node>
+</node>
+</node>
+<node TEXT="Step 1" ID="ID_1325611938" CREATED="1789737314124" MODIFIED="1789829096529" HGAP_QUANTITY="270.5 pt" VSHIFT_QUANTITY="35.25 pt"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -1420,8 +1470,137 @@
     </p>
   </body>
 </html></richcontent>
+<node TEXT="Description" ID="ID_1499481724" CREATED="1789831802192" MODIFIED="1789833033155" HGAP_QUANTITY="29.75 pt" VSHIFT_QUANTITY="72 pt"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      checks quote_status for UNVERIFIED_QUOTE to run the repair_quote function. CONTINUE THIS
+    </p>
+  </body>
+</html></richcontent>
 </node>
-<node TEXT="Step 2" ID="ID_1739057579" CREATED="1789737330479" MODIFIED="1789748054906" HGAP_QUANTITY="79.25 pt" VSHIFT_QUANTITY="24.75 pt"><richcontent TYPE="DETAILS">
+<node TEXT="iF quote_status is UNVERIFIED_QUOTE" ID="ID_572467905" CREATED="1789832066051" MODIFIED="1789832986273">
+<node TEXT="true" ID="ID_1394218745" CREATED="1789832182959" MODIFIED="1789832191376">
+<node TEXT="candidate" POSITION="bottom_or_right" ID="ID_762262213" CREATED="1789832135136" MODIFIED="1789832157778"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      (repaired.get(&quot;quote&quot;) or &quot;&quot;).strip()
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="repaired" POSITION="bottom_or_right" ID="ID_576214798" CREATED="1789832100020" MODIFIED="1789832130589"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      repair_quote(chunk, entry, chat_fn)
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="if candidate and candidate.upper() != &quot;NOT FOUND&quot; and normalize(candidate) in normalize(chunk):" ID="ID_984503320" CREATED="1789832417175" MODIFIED="1789832440749"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      description of this needed
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="true" ID="ID_225157403" CREATED="1789832553643" MODIFIED="1789832555706">
+<node TEXT="evidence_repair" ID="ID_1417888209" CREATED="1789832574692" MODIFIED="1789832676321"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      Evidence(candidate)
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="working_claim" ID="ID_680521543" CREATED="1789832632564" MODIFIED="1789832668123"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      FactClaim(value=working_claim.value, evidence=evidence_repair)
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="quote_status" ID="ID_503589624" CREATED="1789832638727" MODIFIED="1789832654956"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      &quot;VERIFIED&quot;
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+<node TEXT="false" ID="ID_1216774472" CREATED="1789832687929" MODIFIED="1789832690859">
+<node TEXT="return" ID="ID_714006462" CREATED="1789832691727" MODIFIED="1789832902554">
+<arrowlink DESTINATION="ID_1852003576" STARTINCLINATION="1511.99995 pt;0 pt;" ENDINCLINATION="1511.99995 pt;0 pt;"/>
+<richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      ReaderResult(
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;question=question, fact_type=fact_type, initial_claim=initial_claim,
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;status=&quot;NEEDS_REVIEW&quot;,
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;reason=&quot;Quote could not be verified even after a repair attempt.&quot;,
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;)
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+</node>
+</node>
+<node TEXT="false" ID="ID_594090664" CREATED="1789832158742" MODIFIED="1789833070798">
+<arrowlink DESTINATION="ID_656824912" STARTINCLINATION="0.75 pt;29.25 pt;" ENDINCLINATION="0 pt;-65.25 pt;"/>
+</node>
+</node>
+<node TEXT="if quote_status is OK_NOT_FOUND" ID="ID_656824912" CREATED="1789832956621" MODIFIED="1789833010450">
+<node TEXT="true" ID="ID_168684101" CREATED="1789833011990" MODIFIED="1789833014801">
+<node TEXT="return" ID="ID_1331535304" CREATED="1789833016608" MODIFIED="1789833018593"/>
+</node>
+<node TEXT="false" ID="ID_794706089" CREATED="1789833020397" MODIFIED="1789833117127">
+<arrowlink DESTINATION="ID_1739057579" STARTINCLINATION="0.75 pt;53.25 pt;" ENDINCLINATION="1.5 pt;-74.25 pt;"/>
+</node>
+</node>
+</node>
+<node TEXT="Step 2" ID="ID_1739057579" CREATED="1789737330479" MODIFIED="1789836577183" HGAP_QUANTITY="252.5 pt" VSHIFT_QUANTITY="38.25 pt"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -1432,50 +1611,199 @@
     </p>
   </body>
 </html></richcontent>
-<node TEXT="" ID="ID_1229348554" CREATED="1789751527873" MODIFIED="1789751527873"/>
+<node TEXT="description" ID="ID_1229348554" CREATED="1789751527873" MODIFIED="1789834658902"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      check if theres a corrected claim, if not then moves onto step 3. if its not none, then see if the corrected claim's evidence quote is not found, if it is then you
+    </p>
+  </body>
+</html></richcontent>
 </node>
-<node TEXT="Step 3" ID="ID_719783911" CREATED="1789737333533" MODIFIED="1789737336237">
+<node TEXT="check_answer_support" ID="ID_1483242275" CREATED="1789836348908" MODIFIED="1789836363430"/>
+<node TEXT="judge_support" ID="ID_951560180" CREATED="1789836363917" MODIFIED="1789836379602"/>
+<node TEXT="if corrected claim is not none" ID="ID_1464384359" CREATED="1789836404761" MODIFIED="1789865730943">
+<node TEXT="true" ID="ID_439410428" CREATED="1789836415448" MODIFIED="1789836417655">
+<node TEXT="working claim" ID="ID_874314430" CREATED="1789836419899" MODIFIED="1789836437994"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      corrected_claim
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="example" ID="ID_795144016" CREATED="1789865761335" MODIFIED="1789865796019"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      
+    </p>
+    <p>
+      FactClaim(value='YES', evidence=Evidence(quote='The invoice was issued on March 3rd, 2024'))
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+<node TEXT="if corrected_claim.evidence.quote == &quot;NOT FOUND&quot;" ID="ID_98079252" CREATED="1789836440773" MODIFIED="1789836477008">
+<node TEXT="true" ID="ID_1356142097" CREATED="1789836480346" MODIFIED="1789836482381">
+<node TEXT="return" ID="ID_1891942795" CREATED="1789836482686" MODIFIED="1789836502110"><richcontent TYPE="DETAILS" HIDDEN="true">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      ReaderResult(
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;question=question, fact_type=fact_type, initial_claim=initial_claim,
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;evidence_repair=evidence_repair, support_judgment=support_judgment,
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;corrected_claim=corrected_claim, status=&quot;VERIFIED_CORRECTED&quot;,
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;reason=&quot;Original evidence did not support the original claim; claim corrected.&quot;,
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;)
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+<node TEXT="false" ID="ID_800255792" CREATED="1789836508443" MODIFIED="1789837166931">
+<arrowlink DESTINATION="ID_719783911" STARTINCLINATION="-4.5 pt;162 pt;" ENDINCLINATION="0 pt;-239.99999 pt;"/>
+</node>
+</node>
+</node>
+<node TEXT="false" ID="ID_784762440" CREATED="1789836529684" MODIFIED="1789837155401">
+<arrowlink DESTINATION="ID_719783911" STARTINCLINATION="1.5 pt;89.25 pt;" ENDINCLINATION="3.75 pt;-192.74999 pt;"/>
+</node>
+</node>
+</node>
+<node TEXT="Step 3" ID="ID_719783911" CREATED="1789737333533" MODIFIED="1789836581736" HGAP_QUANTITY="210.5 pt" VSHIFT_QUANTITY="64.5 pt">
+<node TEXT="description" ID="ID_1229045356" CREATED="1789836594898" MODIFIED="1789837161440"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      This step is split into 3 phases&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;
+    </p>
+  </body>
+</html></richcontent>
+</node>
 <node TEXT="Prephase" ID="ID_59928232" CREATED="1789748070329" MODIFIED="1789748079707"/>
 <node TEXT="Phase A" ID="ID_1847919445" CREATED="1789748080189" MODIFIED="1789748083000"/>
 <node TEXT="Phase B" ID="ID_151159511" CREATED="1789748083675" MODIFIED="1789748085905"/>
 </node>
 </node>
-<node TEXT="classify_fact_type" FOLDED="true" POSITION="bottom_or_right" ID="ID_1680687420" CREATED="1789745547335" MODIFIED="1789747167598"><richcontent TYPE="DETAILS">
+<node TEXT="check_answer_support" POSITION="bottom_or_right" ID="ID_1174273212" CREATED="1789752105231" MODIFIED="1789864162235" TEXT_SHORTENED="true"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
   </head>
   <body>
     <p>
-      (function) def classify_fact_type(value: Any) -&gt; Literal['boolean', 'numeric', 'text']
+      (function) def check_answer_support(
+    </p>
+    <p>
+      &#xa0;chunk: Unknown,
+    </p>
+    <p>
+      &#xa0;entry: Unknown,
+    </p>
+    <p>
+      &#xa0;chat_fn: Unknown
+    </p>
+    <p>
+      ) -&gt; dict[str, Unknown | None]
     </p>
   </body>
 </html></richcontent>
-<node TEXT="Description" ID="ID_1685832934" CREATED="1789745592769" MODIFIED="1789747143277" HGAP_QUANTITY="29.75 pt" VSHIFT_QUANTITY="176.24999 pt"><richcontent TYPE="DETAILS">
+<node TEXT="description" ID="ID_1239083630" CREATED="1789752114300" MODIFIED="1789842394195" HGAP_QUANTITY="73.25 pt"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
   </head>
   <body>
     <p>
-      Guess whether a claimed value is boolean, numeric, or free text. Used only to label the ReaderResult - it never affects verification.
+      Narrow check for VERIFIED entries: does the exact quote actually
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;support this specific question+answer, or only the general topic?
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;May return a corrected answer. Returns {&quot;answer&quot;: ..., &quot;quote&quot;: ...}. see the return node for an example
     </p>
   </body>
 </html></richcontent>
 </node>
-<node TEXT="Return" ID="ID_538676207" CREATED="1789745598057" MODIFIED="1789746844868" HGAP_QUANTITY="23.75 pt" VSHIFT_QUANTITY="10.5 pt"><richcontent TYPE="DETAILS">
+<node TEXT="Return" ID="ID_690178472" CREATED="1789752121377" MODIFIED="1789848323472" HGAP_QUANTITY="74 pt" VSHIFT_QUANTITY="36 pt">
+<arrowlink DESTINATION="ID_863941911" STARTINCLINATION="923.99997 pt;0 pt;" ENDINCLINATION="924.74997 pt;0 pt;"/>
+<arrowlink SHAPE="CUBIC_CURVE" TRANSPARENCY="255" FONT_SIZE="12" DESTINATION="ID_385014943" STARTINCLINATION="3398.2499 pt;0 pt;" ENDINCLINATION="666.74998 pt;-526.49998 pt;"/>
+<arrowlink DESTINATION="ID_202758912"/>
+<richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    {'answer': 'NO', 'quote': 'The invoice was issued on March 3rd, 2024, to Acme Corp. Payment terms are net-30. The total amount due is $4,250.00.'}
+  </body>
+</html></richcontent>
+<node TEXT="return {&quot;answer&quot;: fields.get(&quot;ANSWER&quot;), &quot;quote&quot;: fields.get(&quot;QUOTE&quot;)}" ID="ID_690369259" CREATED="1789752195906" MODIFIED="1789752212482"/>
+<node TEXT="More explanation" ID="ID_290914396" CREATED="1789842397138" MODIFIED="1789847180735" VSHIFT_QUANTITY="-194.24999 pt"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
   </head>
   <body>
     <p>
-      &quot;boolean&quot; OR &quot;numeric&quot; OR &quot;text&quot;
+      given the ANSWER_SUPPORT_PROMPT, the model sees:
+    </p>
+    <p>
+      QUESTION: Does this chunk state a specific due date for payment?
+    </p>
+    <p>
+      ANSWER: YES.
+    </p>
+    <p>
+      QUOTE: The invoice was issued on March 3rd, 2024.
+    </p>
+    <p>
+      
+    </p>
+    <p>
+      And is asked if the QUOTE directly support this exact ANSWER to this exact QUESTION?
+    </p>
+    <p>
+      
+    </p>
+    <p>
+      you see in the content of the Return (my parent node) that the model said No, since my prompt states that an 'issued' date does not support a 'due' date. This leads to a good correction, but it's limited in scope due to my prompt engineering making this rather obvious.
     </p>
   </body>
 </html></richcontent>
-<node TEXT="additional information" ID="ID_1039837042" CREATED="1789746679994" MODIFIED="1789748702552">
-<arrowlink DESTINATION="ID_161050942" STARTINCLINATION="1095.74997 pt;-132 pt;" ENDINCLINATION="1071.74997 pt;-132 pt;"/>
+</node>
+</node>
+<node TEXT="variables" ID="ID_888766957" CREATED="1789752123781" MODIFIED="1789829154788" HGAP_QUANTITY="81.5 pt">
+<node TEXT="prompt" ID="ID_1861284021" CREATED="1789752134138" MODIFIED="1789841344894">
+<arrowlink DESTINATION="ID_1756165345" STARTINCLINATION="0 pt;36 pt;" ENDINCLINATION="1.5 pt;-35.25 pt;"/>
 <richcontent TYPE="DETAILS">
 <html>
   <head>
@@ -1483,26 +1811,383 @@
   </head>
   <body>
     <p>
-      the return is either a boolean, numeric, or text see the details in the variables node.
+      ANSWER_SUPPORT_PROMPT.format(
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;chunk=chunk, item=entry['item'], answer=entry['answer'], quote=entry['quote']
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;)
     </p>
   </body>
 </html></richcontent>
 </node>
-</node>
-<node TEXT="variables" ID="ID_29465060" CREATED="1789745601788" MODIFIED="1789746526102" VSHIFT_QUANTITY="60 pt">
-<node TEXT="value" ID="ID_236426929" CREATED="1789746173470" MODIFIED="1789746319652"><richcontent TYPE="DETAILS">
+<node TEXT="reply" ID="ID_1242756103" CREATED="1789752137428" MODIFIED="1789841933900" VSHIFT_QUANTITY="51 pt">
+<arrowlink DESTINATION="ID_370845385" STARTINCLINATION="0 pt;24.75 pt;" ENDINCLINATION="3 pt;-36.75 pt;"/>
+<richcontent TYPE="DETAILS">
 <html>
   <head>
     
   </head>
   <body>
     <p>
-      parameter taken from entry[&quot;answer&quot;]. Its part of the entry that run_entry_loop passes into process_entry.
+      chat_fn(prompt)
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="chat_fn" ID="ID_1756165345" CREATED="1789841267847" MODIFIED="1789841271059"/>
+</node>
+<node TEXT="fields" ID="ID_637359158" CREATED="1789752142521" MODIFIED="1789841945176" VSHIFT_QUANTITY="36.75 pt"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      parse_fields(reply)
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="parse_fields" ID="ID_370845385" CREATED="1789841900429" MODIFIED="1789841942048"/>
+</node>
+</node>
+</node>
+<node TEXT="parse_fields" FOLDED="true" POSITION="bottom_or_right" ID="ID_1022997737" CREATED="1789841948548" MODIFIED="1789864445889" TEXT_SHORTENED="true"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      (function) def parse_fields(text: Unknown) -&gt; dict[Unknown, Unknown]
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="description" ID="ID_1022864759" CREATED="1789841955015" MODIFIED="1789841992244"><richcontent TYPE="DETAILS" HIDDEN="true">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      Split any 'KEY: value' formatted model response into a dict.
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;Shared by every prompt in this module that uses that format, so
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;there's exactly one place that knows how to read model output.
     </p>
   </body>
 </html></richcontent>
 </node>
-<node TEXT="v" ID="ID_1552050729" CREATED="1789746337334" MODIFIED="1789746385316"><richcontent TYPE="DETAILS">
+<node TEXT="return" ID="ID_1782016474" CREATED="1789841960422" MODIFIED="1789842076846"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      {'ANSWER': 'NO', 'QUOTE': 'The invoice was issued on March 3rd, 2024, to Acme Corp. Payment terms are net-30. The total amount due is $4,250.00.'}
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="return fields" ID="ID_49471733" CREATED="1789842078161" MODIFIED="1789842084974"/>
+</node>
+<node TEXT="variables" ID="ID_732308271" CREATED="1789842086912" MODIFIED="1789842088665">
+<node TEXT="fields" ID="ID_189819807" CREATED="1789842089051" MODIFIED="1789842113361"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      fields = {}
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;for line in text.strip().splitlines():
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;if &quot;:&quot; in line:
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;k, v = line.split(&quot;:&quot;, 1)
+    </p>
+    <p>
+      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;fields[k.strip()] = v.strip()
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+</node>
+<node TEXT="judge_support" FOLDED="true" POSITION="bottom_or_right" ID="ID_1231948381" CREATED="1789844440467" MODIFIED="1789864214225" TEXT_SHORTENED="true"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      (function) def _judge_support(
+    </p>
+    <p>
+      &#xa0;working_claim: Unknown,
+    </p>
+    <p>
+      &#xa0;raw_support: Unknown,
+    </p>
+    <p>
+      &#xa0;chunk: Unknown
+    </p>
+    <p>
+      ) -&gt; (tuple[SupportJudgment, None] | tuple[SupportJudgment, FactClaim])
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="description" ID="ID_41161990" CREATED="1789844455637" MODIFIED="1789865127015" HGAP_QUANTITY="14.75 pt" VSHIFT_QUANTITY="48 pt" TEXT_SHORTENED="true"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      Translate check_answer_support()'s raw model-oriented dict into domain objects. This is the ONE place the old &quot;answer&quot;/&quot;quote&quot; dict vocabulary is allowed to leak in from the helper; process_entry never reads raw_support directly.
+    </p>
+    <p>
+      
+    </p>
+    <p>
+      Returns (SupportJudgment, corrected_claim_or_None). corrected_claim is None when the evidence supported the existing claim - i.e. nothing new to report, working_claim stands as-is - OR when the model proposed a correction whose value isn't even the right type for this fact.
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="return" ID="ID_1411703431" CREATED="1789845408612" MODIFIED="1789864253665" VSHIFT_QUANTITY="31.5 pt">
+<arrowlink DESTINATION="ID_713851143"/>
+<arrowlink DESTINATION="ID_1417205328"/>
+</node>
+<node TEXT="variables" ID="ID_1367165620" CREATED="1789845414446" MODIFIED="1789863966110" HGAP_QUANTITY="205.24999 pt" VSHIFT_QUANTITY="92.25 pt">
+<node TEXT="proposed_value" FOLDED="true" ID="ID_331841092" CREATED="1789846637129" MODIFIED="1789846690852"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      (raw_support.get(&quot;answer&quot;) or &quot;&quot;).strip()
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="raw_support" ID="ID_863941911" CREATED="1789846794160" MODIFIED="1789846944995"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      {'answer': 'NO', 'quote': 'The invoice was issued on March 3rd, 2024, to Acme Corp. Payment terms are net-30. The total amount due is $4,250.00.'}
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="so this variables actually contains (as an example)" ID="ID_174627872" CREATED="1789850061869" MODIFIED="1789850128146"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      No
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+</node>
+<node TEXT="proposed_quote" ID="ID_1186587011" CREATED="1789846642623" MODIFIED="1789846700698"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      (raw_support.get(&quot;quote&quot;) or &quot;&quot;).strip()
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="raw_support" ID="ID_202758912" CREATED="1789846794160" MODIFIED="1789846944995"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      {'answer': 'NO', 'quote': 'The invoice was issued on March 3rd, 2024, to Acme Corp. Payment terms are net-30. The total amount due is $4,250.00.'}
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="so this variable actually contains (as an example)" ID="ID_147093617" CREATED="1789850084401" MODIFIED="1789850114267"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      'The invoice was issued on March 3rd, 2024, to Acme Corp. Payment terms are net-30. The total amount due is $4,250.00.'
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+</node>
+<node TEXT="judgement" ID="ID_1767922543" CREATED="1789846648988" MODIFIED="1789846771312"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      SupportJudgment(verdict=&quot;UNSUPPORTED&quot;, checked_claim=working_claim)
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="fact_type" ID="ID_1796914853" CREATED="1789850444220" MODIFIED="1789859858580"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      classify_fact_type(working_claim.value)
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="classify_fact_type" ID="ID_1499890676" CREATED="1789850459077" MODIFIED="1789850474262">
+<node TEXT="working_claim.value" ID="ID_1418328994" CREATED="1789850474268" MODIFIED="1789859657855"/>
+</node>
+</node>
+</node>
+<node TEXT="if not proposed_value or proposed_value.upper() == working_claim.value.strip().upper():" ID="ID_153066108" CREATED="1789850156243" MODIFIED="1789863972024" HGAP_QUANTITY="298.24999 pt" VSHIFT_QUANTITY="25.5 pt">
+<node TEXT="true" ID="ID_555792860" CREATED="1789850347325" MODIFIED="1789850361693">
+<node TEXT="return" ID="ID_630025514" CREATED="1789850362428" MODIFIED="1789850383972"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      SupportJudgment(verdict=&quot;SUPPORTED&quot;, checked_claim=working_claim), None
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+<node TEXT="false" ID="ID_372385225" CREATED="1789850386144" MODIFIED="1789860561337">
+<arrowlink DESTINATION="ID_1595656923" STARTINCLINATION="0 pt;22.5 pt;" ENDINCLINATION="0 pt;-38.25 pt;"/>
+</node>
+</node>
+<node TEXT="if not is_valid_value(proposed_value, fact_type):" ID="ID_1595656923" CREATED="1789850392561" MODIFIED="1789863958305" HGAP_QUANTITY="307.24999 pt" VSHIFT_QUANTITY="42 pt">
+<node TEXT="true" ID="ID_1339709684" CREATED="1789859975169" MODIFIED="1789863943893">
+<node TEXT="return" ID="ID_809904076" CREATED="1789860013296" MODIFIED="1789863943893" VSHIFT_QUANTITY="-22.5 pt"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      judgment, None
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+<node TEXT="false" ID="ID_800869975" CREATED="1789859977242" MODIFIED="1789863979525">
+<arrowlink DESTINATION="ID_607535111" STARTINCLINATION="-1.5 pt;30 pt;" ENDINCLINATION="0 pt;-68.25 pt;"/>
+</node>
+</node>
+<node TEXT="if not proposed_quote or proposed_quote.upper() == &quot;NOT FOUND&quot; \&#xa;            or normalize(proposed_quote) not in normalize(chunk):" ID="ID_607535111" CREATED="1789859955672" MODIFIED="1789864741129" HGAP_QUANTITY="61.25 pt" VSHIFT_QUANTITY="25.5 pt">
+<node TEXT="true" ID="ID_258984692" CREATED="1789859979855" MODIFIED="1789859981083">
+<node TEXT="corrected" ID="ID_757396224" CREATED="1789860040511" MODIFIED="1789865101099">
+<arrowlink DESTINATION="ID_215500455" STARTINCLINATION="100.5 pt;0 pt;" ENDINCLINATION="-114.75 pt;0 pt;"/>
+<richcontent TYPE="DETAILS" HIDDEN="true">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      FactClaim(value=proposed_value, evidence=Evidence(&quot;NOT FOUND&quot;))
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+<node TEXT="false" ID="ID_441518564" CREATED="1789859981393" MODIFIED="1789859982508">
+<node TEXT="corrected" ID="ID_1363549299" CREATED="1789860058497" MODIFIED="1789865103067">
+<arrowlink DESTINATION="ID_215500455" STARTINCLINATION="86.25 pt;0 pt;" ENDINCLINATION="-99.75 pt;0 pt;"/>
+<richcontent TYPE="DETAILS" HIDDEN="true">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      corrected = FactClaim(value=proposed_value, evidence=Evidence(proposed_quote))
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+</node>
+</node>
+<node TEXT="is_valid_value" FOLDED="true" POSITION="bottom_or_right" ID="ID_1374664677" CREATED="1789860628784" MODIFIED="1789863671539"><richcontent TYPE="DETAILS" HIDDEN="true">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      (function) def is_valid_value(
+    </p>
+    <p>
+      &#xa0;value: Unknown,
+    </p>
+    <p>
+      &#xa0;fact_type: Unknown
+    </p>
+    <p>
+      ) -&gt; bool
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="description" ID="ID_266517584" CREATED="1789860671919" MODIFIED="1789860684644"><richcontent TYPE="DETAILS" HIDDEN="true">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      Check whether value is even the right kind of thing for fact_type (&quot;boolean&quot;, &quot;numeric&quot;, or &quot;text&quot;). Used to catch a model proposing a correction that doesn't match the fact's type at all - e.g. &quot;corrected&quot; a numeric fact to free text, or a YES/NO fact to a dollar amount. This never judges whether the value is factually correct, only whether it's a plausible value of that type.
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="return" ID="ID_1816237769" CREATED="1789860686247" MODIFIED="1789863943894">
+<arrowlink DESTINATION="ID_1595656923"/>
+<richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      there are lots of different returns for different situations. see below for the logic
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="variables" ID="ID_1372590337" CREATED="1789860689626" MODIFIED="1789860700911">
+<node TEXT="v" ID="ID_1177022218" CREATED="1789862537825" MODIFIED="1789862555724"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -1513,7 +2198,10 @@
     </p>
   </body>
 </html></richcontent>
-<node TEXT="cleaned" POSITION="bottom_or_right" ID="ID_578829010" CREATED="1789746344087" MODIFIED="1789746495873"><richcontent TYPE="DETAILS">
+</node>
+<node TEXT="cleaned" ID="ID_123688784" CREATED="1789862566337" MODIFIED="1789864387204">
+<arrowlink DESTINATION="ID_701127083" STARTINCLINATION="-0.75 pt;108 pt;" ENDINCLINATION="123.75 pt;-88.5 pt;" STARTARROW="NONE" ENDARROW="NONE"/>
+<richcontent TYPE="DETAILS">
 <html>
   <head>
     
@@ -1524,67 +2212,137 @@
     </p>
   </body>
 </html></richcontent>
-<node TEXT="numeric" ID="ID_1092197309" CREATED="1789746498087" MODIFIED="1789746872518"><richcontent TYPE="DETAILS">
+</node>
+</node>
+<node TEXT="if not v" ID="ID_1472490706" CREATED="1789862675090" MODIFIED="1789863736554">
+<node TEXT="true" ID="ID_1351109079" CREATED="1789863325445" MODIFIED="1789863328215">
+<node TEXT="return" ID="ID_881518196" CREATED="1789863329050" MODIFIED="1789863341189"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
   </head>
   <body>
     <p>
-      &#xa0;try:
-    </p>
-    <p>
-      &#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;float(cleaned)
+      false
     </p>
   </body>
 </html></richcontent>
 </node>
-<node TEXT="text" ID="ID_368503935" CREATED="1789746512122" MODIFIED="1789746911517"><richcontent TYPE="DETAILS">
+</node>
+<node TEXT="false" ID="ID_1765415500" CREATED="1789863342707" MODIFIED="1789863750890" HGAP_QUANTITY="12.5 pt" VSHIFT_QUANTITY="1.5 pt">
+<arrowlink DESTINATION="ID_421934009" STARTINCLINATION="-1.5 pt;17.25 pt;" ENDINCLINATION="0 pt;-12.75 pt;"/>
+</node>
+</node>
+<node TEXT="if fact_type == &quot;boolean&quot;" ID="ID_421934009" CREATED="1789863347023" MODIFIED="1789863731969" HGAP_QUANTITY="4.25 pt" VSHIFT_QUANTITY="46.5 pt">
+<node TEXT="true" ID="ID_348223339" CREATED="1789863362292" MODIFIED="1789863364291">
+<node TEXT="return" ID="ID_902631650" CREATED="1789863380666" MODIFIED="1789863386741"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
   </head>
   <body>
     <p>
-      if it isn't boolean and the try for a float fails then it's text by default
+      v in (&quot;YES&quot;, &quot;NO&quot;)
     </p>
   </body>
 </html></richcontent>
 </node>
 </node>
-<node TEXT="boolean" POSITION="bottom_or_right" ID="ID_1403723906" CREATED="1789746516407" MODIFIED="1789746857298"><richcontent TYPE="DETAILS">
+<node TEXT="false" ID="ID_1333376777" CREATED="1789863389313" MODIFIED="1789863712385">
+<arrowlink DESTINATION="ID_184992681" STARTINCLINATION="-0.75 pt;24.75 pt;" ENDINCLINATION="0 pt;-27 pt;"/>
+</node>
+</node>
+<node TEXT="if fact_type == &quot;numeric&quot;:" ID="ID_184992681" CREATED="1789863398375" MODIFIED="1789863679617">
+<node TEXT="true" ID="ID_452688499" CREATED="1789863417298" MODIFIED="1789863419434">
+<node TEXT="cleaned" ID="ID_701127083" CREATED="1789862566337" MODIFIED="1789862659890"><richcontent TYPE="DETAILS">
 <html>
   <head>
     
   </head>
   <body>
     <p>
-      if v in (&quot;YES&quot;, &quot;NO&quot;):
+      v.replace(&quot;$&quot;, &quot;&quot;).replace(&quot;,&quot;, &quot;&quot;).strip()
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="try" ID="ID_1445971363" CREATED="1789863576086" MODIFIED="1789863614203"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      float(cleaned)
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="return true" ID="ID_303882874" CREATED="1789863614648" MODIFIED="1789863621961"/>
+<node TEXT="except ValueError" ID="ID_1948597797" CREATED="1789863635027" MODIFIED="1789863652630"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      returns false
     </p>
   </body>
 </html></richcontent>
 </node>
 </node>
 </node>
+<node TEXT="false" ID="ID_1306968547" CREATED="1789863657296" MODIFIED="1789863694176">
+<arrowlink DESTINATION="ID_141233168" STARTINCLINATION="0 pt;28.5 pt;" ENDINCLINATION="2.25 pt;-49.5 pt;"/>
 </node>
-<node TEXT="check_answer_support" POSITION="bottom_or_right" ID="ID_1174273212" CREATED="1789752105231" MODIFIED="1789752113908">
-<node TEXT="description" ID="ID_1239083630" CREATED="1789752114300" MODIFIED="1789752120797"/>
-<node TEXT="Return" ID="ID_690178472" CREATED="1789752121377" MODIFIED="1789752195114"><richcontent TYPE="DETAILS">
+</node>
+<node TEXT="return" ID="ID_141233168" CREATED="1789863660960" MODIFIED="1789863671538" VSHIFT_QUANTITY="25.5 pt"><richcontent TYPE="DETAILS">
 <html>
-  
-
   <head>
-
+    
   </head>
   <body>
+    <p>
+      True
+    </p>
   </body>
 </html></richcontent>
-<node TEXT="return {&quot;answer&quot;: fields.get(&quot;ANSWER&quot;), &quot;quote&quot;: fields.get(&quot;QUOTE&quot;)}" ID="ID_690369259" CREATED="1789752195906" MODIFIED="1789752212482"/>
 </node>
-<node TEXT="variables" ID="ID_888766957" CREATED="1789752123781" MODIFIED="1789752125764">
-<node TEXT="prompt" ID="ID_1861284021" CREATED="1789752134138" MODIFIED="1789752136508"/>
-<node TEXT="reply" ID="ID_1242756103" CREATED="1789752137428" MODIFIED="1789752140649"/>
-<node TEXT="fields" ID="ID_637359158" CREATED="1789752142521" MODIFIED="1789752145539"/>
+</node>
+<node TEXT="normalize" FOLDED="true" ID="ID_1565199565" CREATED="1789864487884" MODIFIED="1789864566816"><richcontent TYPE="DETAILS" HIDDEN="true">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      (function) def normalize(text: Unknown) -&gt; str
+    </p>
+  </body>
+</html></richcontent>
+<node TEXT="return" ID="ID_1890650824" CREATED="1789864497242" MODIFIED="1789864527758"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      re.sub(r'\s+', ' ', text.strip())
+    </p>
+  </body>
+</html></richcontent>
+</node>
+<node TEXT="Description" ID="ID_1151706510" CREATED="1789864530495" MODIFIED="1789864546689"><richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      Collapse whitespace so trivial formatting diffs don't cause false FAILs.
+    </p>
+  </body>
+</html></richcontent>
 </node>
 </node>
 </node>
@@ -1592,5 +2350,31 @@
 </node>
 <node TEXT="The Auditor" POSITION="bottom_or_right" ID="ID_1810118793" CREATED="1789664610327" MODIFIED="1789664613799"/>
 <node TEXT="The Inspector" POSITION="bottom_or_right" ID="ID_632580795" CREATED="1789664616608" MODIFIED="1789664621568"/>
+<node TEXT="return judgement, corrected" LOCALIZED_STYLE_REF="defaultstyle.floating" POSITION="bottom_or_right" ID="ID_215500455" CREATED="1789864965249" MODIFIED="1789865109206" HGAP_QUANTITY="1258.49996 pt" VSHIFT_QUANTITY="719.99998 pt">
+<hook NAME="FreeNode"/>
+<richcontent TYPE="DETAILS">
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      examples of what judgement and corrected may contain (changes depending on the situation)
+    </p>
+    <p>
+      judgment
+    </p>
+    <p>
+      SupportJudgment(verdict='UNSUPPORTED', checked_claim=FactClaim(value='YES', evidence=Evidence(quote='The invoice was issued on March 3rd, 2024')))
+    </p>
+    <p>
+      corrected
+    </p>
+    <p>
+      FactClaim(value='NO', evidence=Evidence(quote='The invoice was issued on March 3rd, 2024, to Acme Corp. Payment terms are net-30. The total amount due is $4,250.00.'))
+    </p>
+  </body>
+</html></richcontent>
+</node>
 </node>
 </map>
