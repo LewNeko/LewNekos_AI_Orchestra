@@ -111,3 +111,27 @@ schema, or an invalid conversation history. Your metadata check is
 So: correct detection, but the custom HTTP message is unreachable,
  and graceful terminal output needs one final try/except
   in the CLI section.
+
+Regarding the runtime of the architecture below////////////////////////////////////////////////////////////////////////
+Architectural Relationship to the Orchestra
+This document describes the Runtime Layer. The Runtime does not replace the Domain Model, Reader, FactHistory, Auditor, Context Engine, or validation framework. It coordinates, exposes, and observes those components. The Orchestra document remains authoritative.
+Executive Summary
+The Runtime is a consumer of the canonical knowledge architecture. It coordinates execution, manages agent state, emits observable events, exposes APIs and UI, orchestrates tool and MCP interactions, and surfaces provenance, evidence chains, ReaderResults, FactHistories, and audit records. It is not the system of record.
+Current State Assessment
+The Runtime must preserve the distinction between model proposals, deterministic validation, semantic judgments, canonical facts, and audit history.
+File To Create: runtime/events.py
+Create strongly typed events including claim_proposed, quote_verified, quote_repaired, support_judgment_created, revision_detected, revision_validated, reader_result_persisted, fact_history_updated, auditor_conflict_detected, context_pack_created, and final_answer_generated. Model Proposal != Validated Finding != Canonical Fact.
+File To Create: runtime/state.py
+Maintain transient execution state including conversations, tasks, tool calls, MCP interactions, retrieved context, ReaderResults, FactHistories, evidence chains, audit references, and planner decisions. Canonical knowledge remains elsewhere.
+File To Create: runtime/planner.py
+Planner chooses workflow capabilities. It does not establish facts. It may query FactHistory, invoke Reader, request retrieval, use Context Engine services, call MCP tools, invoke Auditor services, and generate responses.
+File To Create: reader/reader_service.py
+Expose Reader functionality while preserving Model Proposes -> Deterministic Validation -> Typed ReaderResult -> Persistence.
+File To Create: auditor/auditor_service.py
+Consumes ReaderResults and FactHistories and performs supersession analysis, contradiction detection, timeline construction, and canonical fact determination.
+File To Create: retrieval/knowledge_service.py
+Retrieves from FactHistory, audit records, ReaderResults, source documents, vector indexes, and hierarchical retrieval. Distinguishes canonical state from retrieval context.
+User Story Walkthrough
+Policy compliance analysis should flow through FactHistory, Auditor, Reader, and evidence-backed analysis before answers are generated.
+Observable Event Timeline
+Expose stages such as Document Loaded, Claim Proposed, Quote Verified, Revision Validated, ReaderResult Persisted, FactHistory Updated, Auditor Decision, Context Expanded, and Final Answer Generated.

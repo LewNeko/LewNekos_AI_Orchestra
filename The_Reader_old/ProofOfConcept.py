@@ -15,12 +15,13 @@ if str(PROJECT_ROOT) not in sys.path:
 # is not at the top of the file. 
 # This is necessary because we need to modify 
 # sys.path before importing. other backends.py import breaks stuff
-from .pipeline import build_fact_history, run_entry_loop # noqa: E402
-from .parsing import parse_entries # noqa: E402
-from .prompts import CHECK_PROMPT # noqa: E402
-from .quote_checks import verified_categorizer, verify # noqa: E402
-from .reporting import print_final_report # noqa: E402
-from .store import ReaderResultStore # noqa: E402
+from .verify_pipeline import ( # noqa: E402
+    build_fact_history,
+    parse_entries,
+    run_entry_loop,
+    verified_categorizer,
+    verify,
+)
 from backends import get_backend # noqa: E402
 
 
@@ -35,6 +36,17 @@ CHECKLIST = [
     "Does this chunk name the company being invoiced?",
     "What's the amount due?",
 ]
+CHECK_PROMPT="""
+You are verifying facts against a source text chunk. For each checklist item, respond in this exact format:
+ITEM: <checklist item>
+ANSWER: YES or NO or <number>
+QUOTE: <exact sentence from the chunk that supports your answer, copied verbatim or NOT FOUND>
+
+Do not paraphrase the quote. Do not answer YES if you cannot produce an exact quote.
+
+CHUNK: {CHUNK}
+CHECKLIST: {CHECKLIST} 
+"""
 # Pick the backend once, here. Order of precedence: CLI arg -> BACKEND env var -> default.
 # Run e.g. `python ProofOfConcept.py claude` or `python ProofOfConcept.py ollama-qwen3-coder`
 # See backends.py's BACKENDS dict for the full list of valid names.
@@ -53,6 +65,47 @@ def chat_fn(prompt):
     reply = backend.chat([{"role": "user", "content": prompt}])
     return reply["content"]
 
+def print_final_report(results):
+    """Print each ReaderResult as the claim/evidence/revision tree, not a
+    flat answer field - so the chain that produced current_value is visible."""
+    for r in results:
+        print(f"""
+Fact
+|
++-- Question
+|     {r.question}  ({r.fact_type})
+|
++-- Initial claim
+|     Value: {r.initial_claim.value}
+|     Evidence: "{r.initial_claim.evidence.quote}\"""")
+        if r.evidence_repair is not None:
+            print(f"""|
++-- Evidence repair
+|     New evidence: "{r.evidence_repair.quote}\"""")
+        if r.support_judgment is not None:
+            print(f"""|
++-- Support judgment
+|     {r.support_judgment.verdict}""")
+        if r.corrected_claim is not None:
+            print(f"""|
++-- Corrected claim
+|     Value: {r.corrected_claim.value}
+|     Evidence: "{r.corrected_claim.evidence.quote}\"""")
+        if r.revision is not None:
+            print(f"""|
++-- Revision
+|     {r.revision.operation} {r.revision.amount}
+|     Evidence: "{r.revision.evidence.quote}\"""")
+        print(f"""|
++-- Status: {r.status}""")
+        if r.reason:
+            print(f"|     reason: {r.reason}")
+        print(f"""|
+`-- Current value
+      {r.current_value}
+""")
+        print("----------------")
+
 #Check the response
 def main():
 
@@ -70,18 +123,6 @@ def main():
     # FactHistory is the durable, cross-run record - built here per-question
     # from this single pass for now (see build_fact_history's docstring).
     HISTORIES = [build_fact_history(r) for r in RESULTS]
-
-    # Persist the complete ReaderResult chain (source of truth) so a vector
-    # DB or anything else can be derived from these rows later, rather than
-    # becoming another source of truth itself.
-    store = ReaderResultStore()
-    run_id = store.start_run(
-        document_id="proof_of_concept",
-        metadata={"backend": BACKEND_NAME},
-    )
-    store.save_results(RESULTS, run_id=run_id, document_id="proof_of_concept")
-    store.close()
-
     return RESULTS, HISTORIES
 
 if __name__ == "__main__":
