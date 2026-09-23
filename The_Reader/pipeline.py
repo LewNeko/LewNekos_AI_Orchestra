@@ -46,11 +46,11 @@ def _terminal_status(corrected_claim, evidence_repair):
     same-value quote repair, which takes priority over plain no-change -
     they're not mutually exclusive (a claim can be both quote-repaired AND
     later corrected), and the corrected_claim always wins."""
-    if corrected_claim is not None:
+    if corrected_claim is not None: #if no corrected claim it means the initial one was fine so there's no need for a verified corrected status
         return "VERIFIED_CORRECTED"
-    if evidence_repair is not None:
+    if evidence_repair is not None: #if the evidence (quote) wasn't verbatim before and was corrected, theres a verified repaired quote
         return "VERIFIED_REPAIRED_QUOTE"
-    return "VERIFIED_NO_CHANGE"
+    return "VERIFIED_NO_CHANGE" #if claim wasn't corrected and the quote wasn't corrected then there was no change
 
 
 def process_entry(chunk, entry, chat_fn):
@@ -63,7 +63,7 @@ def process_entry(chunk, entry, chat_fn):
     FactHistory out of one or more ReaderResults is a separate step.
     """
     question = entry["item"]
-    fact_type = classify_fact_type(entry["answer"]) #boolean, numeric, or text
+    fact_type = classify_fact_type(entry["answer"]) #boolean, numeric, date*, percent, text, currency or unknown
     initial_claim = FactClaim(value=entry["answer"], evidence=Evidence(entry["quote"]))
 
     if entry["status"] == "MISSING_FIELDS":
@@ -132,6 +132,7 @@ def process_entry(chunk, entry, chat_fn):
     # asking the model to invent numbers that don't exist, so skip it.
     if fact_type != "numeric":
         return ReaderResult(
+            #it's easier to understand if you debug and hover over the variables in returns like these
             question=question, fact_type=fact_type, initial_claim=initial_claim,
             evidence_repair=evidence_repair, support_judgment=support_judgment,
             corrected_claim=corrected_claim,

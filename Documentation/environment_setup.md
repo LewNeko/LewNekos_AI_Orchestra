@@ -12,6 +12,7 @@
 3. Install what the project needs  
    `uv pip install <package>`  
    `# pip equivalent: .venv\Scripts\python -m pip install <package>`
+   `# python -m pip install -r requirements.txt`
 
 4. Activate It  
    `# Command Prompt: .venv\Scripts\activate.bat`  
