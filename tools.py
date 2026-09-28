@@ -77,6 +77,20 @@ TOOL_SCHEMA = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "run_linter_check",
+            "description": "Run linter and formatter checks on a given file.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file_path": {"type": "string", "description": "Path to the file to check."}
+                },
+                "required": ["file_path"],
+            },
+        },
+    },
 ]
 
 
@@ -124,10 +138,55 @@ def run_python(path: str) -> str:
     except Exception as e:
         return f"Error: {e}"
 
+def run_linter_check(file_path: str) -> str:
+    """
+    Run linter and formatter checks on a given file by executing external tools
+    like ruff or pylint and returning the combined output.
+    """
+    try:
+        # Attempt to run ruff for formatting and linting
+        ruff_result = subprocess.run(
+            ["ruff", "check", file_path],
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        
+        # Attempt to run pylint for static analysis
+        pylint_result = subprocess.run(
+            ["pylint", file_path],
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
 
+        output = ""
+        if ruff_result.returncode != 0:
+            output += f"Ruff Check Failed (Exit Code {ruff_result.returncode}):\n{ruff_result.stderr}\n"
+        else:
+            output += "Ruff Check Succeeded.\n"
+
+        if pylint_result.returncode != 0:
+            output += f"Pylint Check Failed (Exit Code {pylint_result.returncode}):\n{pylint_result.stderr}\n"
+        else:
+            output += "Pylint Check Succeeded.\n"
+
+        if not output.strip():
+            return "Linter/Formatter checks completed successfully (No issues found)."
+        else:
+            return output.strip()
+
+    except FileNotFoundError:
+        return "Error: Linter/Formatter command (ruff or pylint) not found. Please ensure that necessary tools like 'ruff' and 'pylint' are installed and available in your system's PATH."
+    except subprocess.TimeoutExpired:
+        return "Error: Linter check timed out after 60 seconds."
+    except Exception as e:
+        return f"Error during linting execution: {e}"
+    
 TOOL_FUNCTIONS = {
     "list_directory": list_directory,
     "read_file": read_file,
     "skill_index": skill_index,
     "run_python": run_python,
+    "run_linter_check": run_linter_check,
 }

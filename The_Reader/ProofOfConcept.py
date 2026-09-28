@@ -46,11 +46,11 @@ def run_checklist(chunk, checklist):
         CHUNK=chunk,
         CHECKLIST="\n".join(f"-{item}" for item in checklist)
     )
-    reply = backend.chat([{"role": "user", "content": prompt}])
+    reply = backend.chat([{"role": "user", "content": prompt}], [])
     return reply["content"]
 
 def chat_fn(prompt):
-    reply = backend.chat([{"role": "user", "content": prompt}])
+    reply = backend.chat([{"role": "user", "content": prompt}], [])
     return reply["content"]
 
 #Check the response
