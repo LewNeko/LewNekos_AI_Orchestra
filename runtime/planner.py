@@ -8,11 +8,17 @@ from .state import RuntimeState
 
 
 class Planner:
-    def __init__(self, state: RuntimeState, knowledge_service: Any, reader_service: Any | None = None) -> None:
+    def __init__(
+        self,
+        state: RuntimeState,
+        knowledge_service: Any,
+        reader_service: Any | None = None,
+        events: RuntimeEvents | None = None,
+    ) -> None:
         self.state = state
         self.knowledge_service = knowledge_service
         self.reader_service = reader_service
-        self.events = RuntimeEvents()
+        self.events = events or RuntimeEvents()
         self.events.subscribe(state.record_event)
 
     async def select_workflow(self, task_id: str, goal: str) -> dict[str, Any]:
