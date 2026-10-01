@@ -45,7 +45,9 @@ class RuntimeEvents:
         self._handlers: list[EventHandler] = []
 
     def subscribe(self, handler: EventHandler) -> None:
-        self._handlers.append(handler)
+        """Register a handler once, so shared Runtime services do not duplicate events."""
+        if handler not in self._handlers:
+            self._handlers.append(handler)
 
     def emit(self, event_type: RuntimeEventType, task_id: str, payload: dict[str, Any] | None = None) -> RuntimeEvent:
         event = RuntimeEvent(event_type, task_id, dict(payload or {}))

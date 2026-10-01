@@ -135,3 +135,66 @@ User Story Walkthrough
 Policy compliance analysis should flow through FactHistory, Auditor, Reader, and evidence-backed analysis before answers are generated.
 Observable Event Timeline
 Expose stages such as Document Loaded, Claim Proposed, Quote Verified, Revision Validated, ReaderResult Persisted, FactHistory Updated, Auditor Decision, Context Expanded, and Final Answer Generated.
+
+Just before adding auditor, i prompted codex to look at the codebase to see if there were better methods like langgraph or crewAi////////////////////////////////////////////////
+Yes—the architecture is headed in the right direction, and I would not adopt CrewAI or LangGraph yet.
+
+Your strongest design decision is the separation of:
+
+- generic tool-calling runtime: [orchestrator.py](C:/Users/the1t/Downloads/Orchestrate%20agentic%20AI/LewNekos_Ai_Orchestra/orchestrator.py)
+- provider translation: [backends.py](C:/Users/the1t/Downloads/Orchestrate%20agentic%20AI/LewNekos_Ai_Orchestra/backends.py)
+- document-domain reasoning and verification: [The_Reader/pipeline.py](C:/Users/the1t/Downloads/Orchestrate%20agentic%20AI/LewNekos_Ai_Orchestra/The_Reader/pipeline.py)
+- durable domain vocabulary: [The_Reader/models.py](C:/Users/the1t/Downloads/Orchestrate%20agentic%20AI/LewNekos_Ai_Orchestra/The_Reader/models.py)
+
+That is a better learning architecture than beginning with a multi-agent framework. The tool-call preservation fix in the orchestrator is particularly important: tool results must follow the corresponding assistant tool-call message, and your backend abstraction correctly owns that provider-specific formatting.
+
+I verified the current runtime code compiles and its end-to-end terminal demo runs successfully.
+
+The important caveat: The_Auditor should not be “another LLM agent” first. It should initially be a deterministic domain service that merges Reader outputs into a durable, provenance-preserving fact timeline. Your current [auditor_service.py](C:/Users/the1t/Downloads/Orchestrate%20agentic%20AI/LewNekos_Ai_Orchestra/The_Auditor/auditor_service.py) is a fine adapter skeleton, but its current conflict rule—“every prior claim differing from this result is a conflict”—is too shallow for canonical decisions. A prior value may be legitimately superseded, corrected, scoped differently, or based on a later revision.
+
+Build this next:
+
+```text
+ReaderResult + chunk/source/run provenance
+                ↓
+Fact identity resolution
+                ↓
+Append-only FactHistory timeline
+                ↓
+Deterministic candidate relations:
+same / supersedes / contradicts / unrelated / needs_review
+                ↓
+Auditor decision record with evidence references
+```
+
+Before canonizing a result, the Auditor needs at least:
+
+- stable document, chunk, page/offset, run, and observed-order provenance;
+- a fact key stronger than raw question text;
+- temporal/scoping metadata where available;
+- explicit uncertainty: `CANONICAL`, `SUPERSEDED`, `CONFLICTING`, `UNRESOLVED`, `NEEDS_REVIEW`;
+- no overwriting of older claims—only relationship records and a derived current view.
+
+Your `FactHistory` currently lacks that provenance and relationship structure, so Phase 7 is not really optional before Phase 8. I’d implement the aggregation model and tests first, then make The_Auditor consume it.
+
+On frameworks:
+
+- **CrewAI:** no. It would mostly add roles, prompts, and delegation ceremony. Your Reader/Auditor distinction is a domain pipeline boundary, not evidence that you need autonomous agents talking to each other.
+- **LangGraph:** not yet. Consider it later if you demonstrably need durable workflow checkpoints, pause/resume, retries, branching review paths, or long-running document jobs. Your explicit Python loop is clearer while you are still defining the contracts.
+- **Your own runtime:** appropriate. The event stream and transient `RuntimeState` are a sensible start. Keep canonical facts outside runtime memory, as you already intend.
+
+I would describe the overall document intelligence as a **domain subsystem**, not one huge tool. It can later be exposed to the generic orchestrator through a few narrow tools/capabilities:
+
+```text
+ingest_document
+query_fact_history
+retrieve_evidence
+audit_fact_candidates
+generate_grounded_report
+```
+
+Internally, those call Chunker → Reader → FactHistory → Auditor. That preserves a simple generic orchestration layer without flattening all document intelligence into an opaque mega-tool.
+
+One meaningful risk in the current generic loop: [tools.py](C:/Users/the1t/Downloads/Orchestrate%20agentic%20AI/LewNekos_Ai_Orchestra/tools.py) allows arbitrary paths and arbitrary Python scripts. Before pointing an agent at untrusted documents or repositories, introduce a workspace allowlist, path resolution checks, and a tighter execution policy. Document text can contain prompt-injection instructions; it should be treated as evidence, never authority to invoke tools.
+
+So: stay framework-free, make FactHistory aggregation the immediate implementation target, and make the first Auditor mostly deterministic. Bring LangGraph in only when persistent workflow complexity becomes real—not because the system has multiple named components.
