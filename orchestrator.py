@@ -10,7 +10,7 @@ The orchestrator is responsible for:
     - executing requested tools
     - detecting repeated tool calls
     - feeding tool results back to the model
-    - stopping when the model produces a final answer
+    - stopping when the model produces a final answer (or user exit)
 
 The orchestrator deliberately does NOT know how Ollama, Claude,
 or another provider represents tool calls internally.
@@ -76,12 +76,6 @@ When inspecting a repository:
 7. Verify important conclusions when possible.
 8. Once you have enough evidence, stop using tools and answer.
 
-If a requested file cannot be found:
-- do not repeatedly request the same path
-- inspect the surrounding directory
-- search for the likely filename
-- continue from the information you discover
-
 When recommending code improvements:
 - identify the observed problem
 - explain why it matters
@@ -113,6 +107,47 @@ class AgentState:
     repeated_calls: dict = field(default_factory=dict)
     step: int = 0
 
+def run_tool_call(tool_call: dict) -> dict:
+    """
+    Execute a normalized tool call.
+
+    Backend-specific parsing should already have happened before
+    this function receives the call.
+
+    Args:
+        tool_call (dict): The normalized tool call structure:
+                          {"id": str, "name": str, "input": dict}
+
+    Returns:
+        dict: A dictionary containing the tool call ID, name, and the result.
+    """
+
+    name = tool_call["name"]
+    args = tool_call.get("input", {})
+    call_id = tool_call.get("id", name)
+
+    fn = TOOL_FUNCTIONS.get(name)
+
+    if fn is None:
+        # Handle case where the model requests a tool that is not defined
+        result = f"Unknown tool: {name}"
+    else:
+        try:
+            # Execute the tool function, unpacking the input arguments
+            result = fn(**args)
+        except Exception as exc:
+            # Handle runtime errors during tool execution
+            result = (
+                f"Tool error: {type(exc).__name__}: {exc}"
+            )
+
+    return {
+        "id": call_id,
+        "name": name,
+        "result": str(result),
+    }
+
+
 
 def tool_call_signature(tool_call: dict) -> str:
     """
@@ -134,38 +169,11 @@ def tool_call_signature(tool_call: dict) -> str:
     )
 
 
-def run_tool_call(tool_call: dict) -> dict:
+def run_single_task(task: str, backend_name: str = "ollama") -> str:
     """
-    Execute a normalized tool call.
-
-    Backend-specific parsing should already have happened before
-    this function receives the call.
+    Executes a single, non-interactive task using the agent loop.
+    (Kept for compatibility, but the interactive run is the focus.)
     """
-
-    name = tool_call["name"]
-    args = tool_call.get("input", {})
-    call_id = tool_call.get("id", name)
-
-    fn = TOOL_FUNCTIONS.get(name)
-
-    if fn is None:
-        result = f"Unknown tool: {name}"
-    else:
-        try:
-            result = fn(**args)
-        except Exception as exc:
-            result = (
-                f"Tool error: {type(exc).__name__}: {exc}"
-            )
-
-    return {
-        "id": call_id,
-        "name": name,
-        "result": str(result),
-    }
-
-
-def run(task: str, backend_name: str = "ollama") -> str:
     backend = get_backend(backend_name)
 
     state = AgentState(task=task)
@@ -207,20 +215,7 @@ def run(task: str, backend_name: str = "ollama") -> str:
             return content
 
         # ---------------------------------------------------------
-        # IMPORTANT:
-        #
         # Preserve the assistant's actual tool-call message.
-        #
-        # The old implementation only appended:
-        #
-        #   {"role": "assistant", "content": content}
-        #
-        # which discarded reply["tool_calls"].
-        #
-        # That meant the next model request contained tool results
-        # without the assistant's corresponding tool requests.
-        #
-        # The backend knows how to preserve its native format.
         # ---------------------------------------------------------
 
         state.messages.append(
@@ -314,6 +309,111 @@ def run(task: str, backend_name: str = "ollama") -> str:
     )
 
 
+def interactive_chat(backend_name: str = "ollama"):
+    """
+    Runs the AI model in an interactive conversational loop.
+    """
+    backend = get_backend(backend_name)
+
+    print("--- Interactive Chat Session ---")
+    print(f"Model Backend: {backend_name}")
+    print("Type 'exit' to end the conversation.")
+    print("---------------------------------")
+
+    # Initialize state
+    state = AgentState(task="Start conversation")
+    state.messages = [
+        {
+            "role": "system",
+            "content": SYSTEM_PROMPT,
+        },
+    ]
+
+    while True:
+        try:
+            user_input = input("You: ")
+            if user_input.lower() == 'exit':
+                print("\n--- Conversation Ended ---")
+                break
+
+            # 1. Append user message to history
+            state.messages.append(
+                {"role": "user", "content": user_input}
+            )
+
+            # 2. Get response from the model based on full history
+            reply = backend.chat(
+                state.messages,
+                tools=TOOL_SCHEMA,
+            )
+
+            content = reply.get("content") or ""
+            tool_calls = reply.get("tool_calls") or []
+
+            if content:
+                print(f"AI: {content}")
+
+            # 3. Check for termination (no tool calls and a final answer)
+            if not tool_calls:
+                print("\n--- Agent decided to stop and provide a final answer. ---")
+                print(f"Final Answer: {content}")
+                break
+
+            # 4. Preserve the assistant's message (including tool requests)
+            state.messages.append(
+                backend.make_assistant_message(reply)
+            )
+
+            # 5. Execute tool calls
+            for raw_call in tool_calls:
+                normalized_call = backend.normalize_tool_call(raw_call)
+                signature = tool_call_signature(normalized_call)
+
+                previous_count = state.repeated_calls.get(
+                    signature,
+                    0,
+                )
+
+                if previous_count >= MAX_REPEATED_TOOL_CALLS:
+                    result = (
+                        "This exact tool call has already been attempted. "
+                        "Do not repeat it. Use the information already "
+                        "available or choose a different approach."
+                    )
+                    print(f"  -> blocked repeated tool call: {normalized_call['name']}")
+                    state.messages.append(
+                        backend.make_tool_result_message(
+                            normalized_call,
+                            result,
+                        )
+                    )
+                    continue
+
+                state.repeated_calls[signature] = (
+                    previous_count + 1
+                )
+
+                outcome = run_tool_call(normalized_call)
+                state.tool_history.append(outcome)
+
+                print(
+                    f"  -> tool '{outcome['name']}' result: "
+                    f"{outcome['result'][:200]}"
+                )
+
+                # Feed tool result back to the model
+                state.messages.append(
+                    backend.make_tool_result_message(
+                        normalized_call,
+                        outcome["result"],
+                    )
+                )
+
+        except Exception as e:
+            print(f"\nAn error occurred: {e}")
+            break
+
+
 if __name__ == "__main__":
     import sys
 
@@ -323,19 +423,9 @@ if __name__ == "__main__":
         else "ollama"
     )
 
-    task_input = (
-        " ".join(sys.argv[2:])
-        or "List the files in the current directory."
-    )
-
     print(
-        f"Running with backend: {backend_choice}\n"
-        f"Task: {task_input}\n"
+        f"Running Interactive Chat with backend: {backend_choice}\n"
     )
-
-    final = run(
-        task_input,
-        backend_name=backend_choice,
-    )
-
-    print(f"\nFinal answer:\n{final}")
+    
+    # Call the new interactive function
+    interactive_chat(backend_name=backend_choice)
