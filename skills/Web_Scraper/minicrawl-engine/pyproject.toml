@@ -1,0 +1,23 @@
+[project]
+name = "minicrawl"
+version = "0.2.0"
+description = "Self-hosted web evidence engine: scrape, crawl, search and cite."
+requires-python = ">=3.10"
+dependencies = ["httpx", "beautifulsoup4", "markdownify"]
+
+[project.optional-dependencies]
+api = ["fastapi", "uvicorn"]
+pdf = ["pypdf"]
+browser = ["playwright"]
+all = ["fastapi", "uvicorn", "pypdf", "playwright"]
+dev = ["pytest", "fpdf2"]
+
+[project.scripts]
+minicrawl = "minicrawl.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["minicrawl*"]
