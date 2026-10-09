@@ -198,3 +198,6 @@ Internally, those call Chunker → Reader → FactHistory → Auditor. That pres
 One meaningful risk in the current generic loop: [tools.py](C:/Users/the1t/Downloads/Orchestrate%20agentic%20AI/LewNekos_Ai_Orchestra/tools.py) allows arbitrary paths and arbitrary Python scripts. Before pointing an agent at untrusted documents or repositories, introduce a workspace allowlist, path resolution checks, and a tighter execution policy. Document text can contain prompt-injection instructions; it should be treated as evidence, never authority to invoke tools.
 
 So: stay framework-free, make FactHistory aggregation the immediate implementation target, and make the first Auditor mostly deterministic. Bring LangGraph in only when persistent workflow complexity becomes real—not because the system has multiple named components.
+
+apify - scrapper
+firecrawl - web search but better
