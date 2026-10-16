@@ -38,6 +38,18 @@ def _handle_tool_call(backend, state: AgentState, raw_call) -> None:
     state.repeated_calls[signature] = previous_count + 1
 
     outcome = run_tool_call(call)
+
+    # Context Language Model logic is here btw
+    if call["name"] == "edit_context":
+        # Extract the new messages from the tool input
+        new_msgs = call.get("input",{}).get("messages", [])
+        if isinstance(new_msgs, list): 
+            state.replace_messages(new_msgs) #I need to update the AgentState to accomodate for this.
+            # We don't need to append a tool result to the history
+            # Because the history itself was just replaced.
+    
+    #I think that should be it for context language model logic for this file.
+
     state.tool_history.append(outcome)
 
     print(f"  -> tool '{outcome['name']}' result: "

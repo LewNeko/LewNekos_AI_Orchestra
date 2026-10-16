@@ -33,7 +33,10 @@ class AgentState:
             task=task,
             messages=[{"role": "system", "content": SYSTEM_PROMPT}],
         )
-
+    def replace_messages(self, new_messages: list) -> None: #for Context Language Model use
+        """ Replaces the ENTIRE fucking message history with a brand new list."""
+        self.messages = new_messages
+        
     def new_turn(self) -> None:
         """
         Reset per-turn bookkeeping. Called at the start of every user request.
