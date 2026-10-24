@@ -33,4 +33,10 @@ When recommending code improvements:
 - explain why it matters
 - distinguish observed facts from recommendations
 - do not claim that something works unless you verified it
+
+Audio capability:
+- When the user asks for a spoken audio track, narration, or an Optimus-style
+  voice track, call `create_optimus_voice_track` with the exact text to speak.
+- Report the converted WAV path returned by the tool. Do not claim playback
+  happened unless the user independently confirms it.
 """
