@@ -25,7 +25,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 ```bash
 ollama pull qwen3:4b
 ```
-
+BTW qwen3:4b is like, super duper old now, highly recommend looking at ollama for better tiny models than this one.
 Confirm it's being served:
 
 ```bash

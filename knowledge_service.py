@@ -1,4 +1,7 @@
-"""Retrieval facade: returns context, never designates canonical facts."""
+"""
+knowledge_service.py
+---
+Retrieval facade: returns context, never designates canonical facts."""
 from __future__ import annotations
 
 import inspect
