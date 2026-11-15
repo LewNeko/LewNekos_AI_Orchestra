@@ -350,7 +350,7 @@ BACKENDS = {
     "ollama-gemma4:12b": lambda: OllamaBackend(model="gemma4:12b"),
     "ollama-gemma4:26b-a4b": lambda: OllamaBackend(model="gemma4:26b-a4b"),
     "ollama-qwen3-coder": lambda: OllamaBackend(model="qwen3-coder:latest"),
-    "ollama-embed4gemma": lambda: OllamaBackend(model="embeddinggemma:latest"),
+    "ollama-qwen3.8:27b": lambda: OllamaBackend(model="qwen3.8:27b"),
     "ollama": lambda: OllamaBackend(model="gemma3:4b"),
     "claude": lambda: ClaudeBackend(model="claude-sonnet-5"),
 }

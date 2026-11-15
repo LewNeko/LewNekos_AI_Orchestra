@@ -120,9 +120,9 @@ Provides the generic orchestration architecture. Key abstractions:
   Ollama       Claude
 ```
 
-**`tools.py`** — defines capabilities available to the model (`list_directory()`, `read_file()`, etc.). The orchestrator does not need to know the internal implementation of every tool.
+**`tools.py`** — a facade that defines capabilities available to the model (`list_directory()`, `read_file()`, etc.). The orchestrator does not need to know the internal implementation of every tool.
 
-**`orchestrator.py`** — the fundamental agent loop:
+**`The_Orchestrator/`** (package - `python -m The_Orchestrator [backend]`) - the fundamental agent loop:
 
 ```
 send request
@@ -1079,7 +1079,7 @@ The important architectural change is that `process_entry()` now returns a `Read
 
 **Phase 5 — Establish canonical Reader persistence. — IMPLEMENTED**
 
-`reader_result_store.py` provides SQLite persistence with explicit relationships among processing runs, facts, claims, evidence, support judgments, revisions, and Reader results.
+`The_Reader/store.py` (`ReaderResultStore`, former `reader_result_store.py`) provides SQLite persistence with explicit relationships among processing runs, facts, claims, evidence, support judgements, revisions, and Reader results.
 
 The intended rule is now concrete:
 
