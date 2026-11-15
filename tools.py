@@ -10,6 +10,7 @@ from tooling.execution import run_linter_check, run_python
 from tooling.filesystem import list_directory, read_file, write_file
 from tooling.registry import TOOL_FUNCTIONS
 from tooling.schema import TOOL_SCHEMA
+from tooling.shell import glob_files, grep_files, run_command
 from tooling.skills import skill_index
 from tooling.voice import create_optimus_voice_track
 
@@ -24,4 +25,7 @@ __all__ = [
     "run_python",
     "skill_index",
     "write_file",
+    "glob_files",
+    "grep_files",
+    "run_command",
 ]

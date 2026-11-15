@@ -72,4 +72,69 @@ TOOL_SCHEMA = [
         {"path": {"type": "string", "description": "Path to lint."}},
         ["path"],
     ),
+    _function(
+        "run_command",
+        (
+            """Run a shell command in the terminal and return its bounded 
+            stdout + stderr + exit code. Use for git, make, node, ffmpeg, package managers,
+            and any other command-line task. Commands run with a 120 second timeout.
+                """
+        ),
+        {"command": {"type": "string", "description": "Shell command to run."},
+         "cwd": {"type": "string", "description": "Optional working directory for the command."},
+         "timeout": {"type": "integer", "description": "Optional timeout in seconds; default is 120."},
+        },
+        ["command"],
+    ),
+    _function(
+        "glob_files",
+        "Find files whose names match a glob pattern, searching recursively.",
+        {
+            "pattern": {"type": "string", "description": "Glob pattern to match file names (e.g., '**/*.py')."},
+            "path": {"type": "string", "description": "Root directory to search; (default is '.') ."},
+        },
+        ["pattern"],
+    ),
+    _function(
+        "grep_files",
+        "Search file contents for a substring (case-insensitive) and return matching lines.",
+        {
+            "text": {"type": "string", "description": "Substring to search for."},
+            "path": {"type": "string", "description": "Root directory to search; default is '.'."},
+            "glob": {"type": "string", "description": "Optional file filter, e.g. '*.py'."},
+            "max_results": {"type": "integer", "description": "Optional max matching lines (default 400)."},
+        },
+        ["text"],
+    ),
+    _function(
+        "edit_context",
+        ("""
+            Replace the entire active conversation history with a new, cleamed-up
+            list of messages. Use this to compact, summarise, or restructure your
+            own context (Context Language Model capability). Pass the complete new
+            message list you want to keep, in order. Keep the system prompt first, then drop
+            redundant or already-resolved exchanges, and preserve every
+            fact, decision, and unfinished step you still need to address.
+            This is a full replacement of the conversation history, Not an append or partial edit.
+        """
+        ),
+        {
+            "messages": {
+                "type": "array",
+                "description": "The complete new message history, in order.",
+                "items": {
+                    "type": "object",
+                    "properties":{
+                        "role": {
+                            "type": "string",
+                            "enum": ["system", "user", "assistant", "tool"],
+                        },
+                        "content": {"type": "string"},
+                    },
+                    "required": ["role", "content"],
+                },
+            },
+        },
+        ["messages"],
+    ),
 ]
