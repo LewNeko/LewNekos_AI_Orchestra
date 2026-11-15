@@ -22,6 +22,38 @@ BLOCKED_MESSAGE = (
 )
 
 
+def _handle_edit_context(backend, state: AgentState, call) -> None:
+    """
+    Apply a Context-Language-Model edit: replace the live message history.
+    
+    edit_context is special compared with every other tool -- it does not return a result
+    that has to be appended after a tool_use. It rewrites the history itself, so we swap 
+    the messages and stop, without appending a dangling tool-result (which would leave an unpaired
+    tool_use for the backend and break the Ollama/Anthropic pairing invariants).
+    """
+    new_messages = call.get("input", {}).get("messages", [])
+
+    if not isinstance(new_messages, list) or not new_messages:
+        # Malformed / empty edit: leave history untouched and feed a note back
+        # so the model can correct itself rather than crashing the turn.
+        print(" -> edit_context ignored (no valid new messages)")
+        state.messages.append(
+            backend.make_tool_result_message(
+                call, "edit_context: no valid messages provided; history unchanged"
+            )
+        )
+        return
+
+    before = len(state.messages)
+    state.replace_messages(new_messages)
+    state.tool_history.append(
+        {
+            "name": "edit_context",
+            "result": f"history {before} -> {len(new_messages)} messages",
+        }
+    )
+    print(f" -> edit_context applied: history {before} -> {len(new_messages)} messages")
+
 def _handle_tool_call(backend, state: AgentState, raw_call) -> None:
     """Normalize, loop-guard, execute, and record one tool call."""
     call = backend.normalize_tool_call(raw_call)
@@ -37,23 +69,21 @@ def _handle_tool_call(backend, state: AgentState, raw_call) -> None:
 
     state.repeated_calls[signature] = previous_count + 1
 
-    outcome = run_tool_call(call)
+    # edit_context rewrites the history itself: no tool-result is appended.
 
     # Context Language Model logic is here btw
     if call["name"] == "edit_context":
-        # Extract the new messages from the tool input
-        new_msgs = call.get("input",{}).get("messages", [])
-        if isinstance(new_msgs, list): 
-            state.replace_messages(new_msgs) #I need to update the AgentState to accomodate for this.
-            # We don't need to append a tool result to the history
-            # Because the history itself was just replaced.
-    
+        _handle_edit_context(backend, state, call)
+        return
+
+    outcome = run_tool_call(call)
     #I think that should be it for context language model logic for this file.
 
     state.tool_history.append(outcome)
 
     print(f"  -> tool '{outcome['name']}' result: "
-          f"{outcome['result'][:RESULT_PREVIEW_CHARS]}")
+          f"{outcome['result'][:RESULT_PREVIEW_CHARS]}"
+          )
 
     state.messages.append(
         backend.make_tool_result_message(call, outcome["result"])

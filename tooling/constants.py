@@ -5,6 +5,6 @@ from pathlib import Path
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = REPOSITORY_ROOT / "skills"
 
-MAX_READ_CHARS = 12_000
-MAX_RUN_CHARS = 6_000
-MAX_LINT_CHARS = 12_000
+MAX_READ_CHARS = 25_000
+MAX_RUN_CHARS = 9_000
+MAX_LINT_CHARS = 16_000
